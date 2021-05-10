@@ -1,0 +1,9 @@
+numpy
+pandas
+torch
+sklearn
+scipy
+pycountry_convert
+matplotlib
+xgboost==0.81
+pymrmr
