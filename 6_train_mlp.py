@@ -1,3 +1,5 @@
+# Model training for Multilayer Perceptron (MLP) Neural Network
+
 import pandas as pd
 import numpy as np
 import scipy
@@ -19,6 +21,9 @@ from data_preprocessing import train_val_test_split
 import torch.utils.data as data
 
 class DASSDataset(data.Dataset):
+    """
+    PyTorch dataset object
+    """
     def __init__(self, features, labels):
         self.features = features
         self.labels = labels
@@ -111,10 +116,11 @@ class MultiLayerPerceptron(nn.Module):
 
 
 def confidence_interval(data, confidence=0.95):
+    # Calculate confidence interval
     a = 1.0 * np.array(data)
     n = len(a)
     m, se = np.mean(a), scipy.stats.sem(a)
-    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n-1)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n-1)
     return m-h, m+h
 
 

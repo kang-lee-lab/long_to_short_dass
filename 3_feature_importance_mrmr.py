@@ -1,3 +1,5 @@
+# Feature importance based on Minimum Redundancy Maximum Relevance (MRMR) criteria
+
 import os
 import pymrmr
 import pandas as pd

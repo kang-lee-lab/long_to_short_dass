@@ -1,3 +1,5 @@
+# Data pre-processing
+
 import pandas as pd
 import numpy as np
 import scipy
@@ -12,9 +14,6 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 seed = 42
 data_folder = "./data"
-
-categorical = ["country", "gender"]
-anxiety_questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18]
 
 
 def preprocess(data_df):
@@ -41,7 +40,7 @@ def preprocess(data_df):
     data_df = data_df.reset_index(drop=True)
 
     # Extract the label columns; separate features and labels
-    labels_df = data_df[["anxiety_score", "anxiety_status"]].copy()
+    labels_df = data_df[["anxiety_status"]].copy()
     feats_df = data_df.drop(["anxiety_score", "anxiety_status"], axis=1)
 
     # z-score normalization
@@ -96,7 +95,7 @@ def preprocess(data_df):
 
 def train_val_test_split(feats_df, labels_df, rand=0, save=False):
     """
-    Train / test / validation split
+    Train / validation / test (holdout) dataset split
     """
     feats_arr = np.array(feats_df)
     labels_arr = np.array(labels_df)

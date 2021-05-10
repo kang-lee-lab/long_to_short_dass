@@ -1,3 +1,5 @@
+# Data inspection and filtering
+
 import os
 import json
 import pandas as pd
@@ -7,6 +9,7 @@ data_folder = "./data"
 
 
 def encode_country(row):
+    # Encode country into three major regions (east, west, other)
     country_code = row["country"]
     try:
         if country_code and country_code != "NONE":
@@ -25,6 +28,7 @@ def encode_country(row):
 
 
 def encode_age(row):
+    # Encode age into groups
     age = int(row["age"])
     if age < 18:
         agegroup = 0
@@ -44,7 +48,8 @@ def encode_age(row):
 
 
 def calc_anx(row):
-    with open(os.path.join(data_folder, "qcategories.json"), "r") as f:
+    # Calculate DASS-42 anxiety score
+    with open(os.path.join(data_folder, "dass42_qcategories.json"), "r") as f:
         categories = json.load(f)
     anxiety_questions = [key for key in categories if categories[key] == "anxiety"]
 
@@ -55,7 +60,8 @@ def calc_anx(row):
 
 
 def categorize(row):
-    with open(os.path.join(data_folder, "scoring.json"), "r") as f:
+    # Classify as positive or negative (high or low) status based on threshold
+    with open(os.path.join(data_folder, "dass42_scoring.json"), "r") as f:
         scoring = json.load(f)
     threshold = scoring["anxiety_score"]["moderate"]["min"]  # moderate
     return (1 if row["anxiety_score"] >= threshold else 0)
@@ -72,9 +78,10 @@ print(dataset['age'].mean(), dataset['age'].std())
 print(dataset['region'].value_counts())
 print(dataset['agegroup'].value_counts())
 
-dataset = dataset.drop(dataset[(dataset['gender'] == 0) | (dataset['gender'] == 3)].index)
-dataset = dataset[dataset['age'] >= 18]
-dataset = dataset[dataset['region'] != ""]
+# Filter data
+dataset = dataset.drop(dataset[(dataset['gender'] == 0) | (dataset['gender'] == 3)].index)  # Male and females only
+dataset = dataset[dataset['age'] >= 18]  # Adults only
+dataset = dataset[dataset['region'] != ""]  # Must have region
 
 dataset["anxiety_score"] = dataset.apply(lambda row: calc_anx(row), axis=1)
 dataset["anxiety_status"] = dataset.apply(lambda row: categorize(row), axis=1)
@@ -86,6 +93,7 @@ print(dataset['age'].mean(), dataset['age'].std())
 print(dataset['region'].value_counts())
 print(dataset['anxiety_status'].value_counts())
 
+# Drop unnecessary columns
 to_drop = ["source", "screensize", "uniquenetworklocation", 
             "education", "urban", "engnat", "hand", "religion", 
             "orientation", "race", "voted", "married", "major",

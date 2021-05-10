@@ -1,3 +1,6 @@
+# Model training for Scikit-learn based models 
+# (Random Forest, SVM, Logistic Regression, XGBoost)
+
 import sklearn
 import pandas as pd
 import numpy as np
@@ -19,12 +22,15 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
+
 def confidence_interval(data, confidence=0.95):
+    # Calculate confidence interval
     a = 1.0 * np.array(data)
     n = len(a)
     m, se = np.mean(a), scipy.stats.sem(a)
-    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n-1)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n-1)
     return m-h, m+h
+
 
 question_numbers = [5]
 target = "anxiety_status"
@@ -46,19 +52,10 @@ AUC_95CI_D = []
 F1_95CI_U = []
 F1_95CI_D = []
 
-"""
-Preprocessing
-"""
+
 seed = 42
 data_folder = "./data"
 models_folder = "./models"
-
-with open(os.path.join(data_folder, "qcategories.json"), "r") as f:
-    categories = json.load(f)
-with open(os.path.join(data_folder, "scoring.json"), "r") as f:
-    scoring = json.load(f)
-
-anxiety_questions = [key for key in categories if categories[key] == "anxiety"]
 
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
@@ -66,6 +63,7 @@ labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18]
 # [21, 7, 18, 11, 20, 4, 6, 1, 36, 40, 23] 
 
+# For different numbers of questions from DASS-42
 for num_questions in question_numbers:
     models = {}
 
