@@ -1,0 +1,95 @@
+import os
+import json
+import pandas as pd
+import pycountry_convert as pc
+
+data_folder = "./data"
+
+
+def encode_country(row):
+    country_code = row["country"]
+    try:
+        if country_code and country_code != "NONE":
+            continent_name = pc.country_alpha2_to_continent_code(country_code)
+            if continent_name == "AS":
+                region_name = "east"
+            elif continent_name in ["NA", "EU", "AU"]:
+                region_name = "west"
+            else:
+                region_name = "other"
+        else:
+            region_name = ""
+    except:
+        region_name = ""
+    return region_name
+
+
+def encode_age(row):
+    age = int(row["age"])
+    if age < 18:
+        agegroup = 0
+    elif age < 28:
+        agegroup = 1
+    elif age < 38:
+        agegroup = 2
+    elif age < 48:
+        agegroup = 3
+    elif age < 58:
+        agegroup = 4
+    elif age < 68:
+        agegroup = 5
+    else:
+        agegroup = 6
+    return agegroup
+
+
+def calc_anx(row):
+    with open(os.path.join(data_folder, "qcategories.json"), "r") as f:
+        categories = json.load(f)
+    anxiety_questions = [key for key in categories if categories[key] == "anxiety"]
+
+    score = 0
+    for qnum in anxiety_questions:
+        score += int(row["Q{}A".format(qnum)])
+    return score - len(anxiety_questions)
+
+
+def categorize(row):
+    with open(os.path.join(data_folder, "scoring.json"), "r") as f:
+        scoring = json.load(f)
+    threshold = scoring["anxiety_score"]["moderate"]["min"]  # moderate
+    return (1 if row["anxiety_score"] >= threshold else 0)
+
+
+dataset = pd.read_csv("./data/data.csv", sep='\t')
+dataset["region"] = dataset.apply(lambda row: encode_country(row), axis=1)
+dataset["agegroup"] = dataset.apply(lambda row: encode_age(row), axis=1)
+
+print("Before filtering:")
+print(dataset['gender'].value_counts())
+print(dataset['age'].value_counts())
+print(dataset['age'].mean(), dataset['age'].std())
+print(dataset['region'].value_counts())
+print(dataset['agegroup'].value_counts())
+
+dataset = dataset.drop(dataset[(dataset['gender'] == 0) | (dataset['gender'] == 3)].index)
+dataset = dataset[dataset['age'] >= 18]
+dataset = dataset[dataset['region'] != ""]
+
+dataset["anxiety_score"] = dataset.apply(lambda row: calc_anx(row), axis=1)
+dataset["anxiety_status"] = dataset.apply(lambda row: categorize(row), axis=1)
+
+print("\nAfter filtering:")
+print(dataset['gender'].value_counts())
+print(dataset['agegroup'].value_counts())
+print(dataset['age'].mean(), dataset['age'].std())
+print(dataset['region'].value_counts())
+print(dataset['anxiety_status'].value_counts())
+
+to_drop = ["source", "screensize", "uniquenetworklocation", 
+            "education", "urban", "engnat", "hand", "religion", 
+            "orientation", "race", "voted", "married", "major",
+            "introelapse", "testelapse", "surveyelapse", "familysize"]
+dataset = dataset.drop(to_drop, axis=1)
+
+dataset.to_csv(os.path.join(data_folder, "data_filtered.csv"), index=None)
