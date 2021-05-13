@@ -27,6 +27,19 @@ def encode_country(row):
     return region_name
 
 
+def encode_continent(row):
+    # Encode country into three major regions (east, west, other)
+    country_code = row["country"]
+    try:
+        if country_code and country_code != "NONE":
+            continent_name = pc.country_alpha2_to_continent_code(country_code)
+        else:
+            continent_name = ""
+    except:
+        continent_name = ""
+    return continent_name
+
+
 def encode_age(row):
     # Encode age into groups
     age = int(row["age"])
@@ -68,13 +81,15 @@ def categorize(row):
 
 
 dataset = pd.read_csv("./data/data.csv", sep='\t')
-dataset["region"] = dataset.apply(lambda row: encode_country(row), axis=1)
 dataset["agegroup"] = dataset.apply(lambda row: encode_age(row), axis=1)
+dataset["continent"] = dataset.apply(lambda row: encode_continent(row), axis=1)
+dataset["region"] = dataset.apply(lambda row: encode_country(row), axis=1)
 
 print("Before filtering:")
 print(dataset['gender'].value_counts())
 print(dataset['age'].value_counts())
 print(dataset['age'].mean(), dataset['age'].std())
+print(dataset['continent'].value_counts())
 print(dataset['region'].value_counts())
 print(dataset['agegroup'].value_counts())
 
@@ -90,6 +105,7 @@ print("\nAfter filtering:")
 print(dataset['gender'].value_counts())
 print(dataset['agegroup'].value_counts())
 print(dataset['age'].mean(), dataset['age'].std())
+print(dataset['continent'].value_counts())
 print(dataset['region'].value_counts())
 print(dataset['anxiety_status'].value_counts())
 
