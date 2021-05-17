@@ -32,10 +32,10 @@ def confidence_interval(data, confidence=0.95):
     return m-h, m+h
 
 
-question_numbers = [5]
+question_numbers = [8]
 target = "anxiety_status"
 models_to_train = 10
-models_per_question = 10
+models_per_question = 50
 test_split = 0.1
 model_type = "xgb"
 random.seed(20)
@@ -173,15 +173,17 @@ for num_questions in question_numbers:
             # tn, fp, fn, tp = confusion_matrix(gt_prist, xgbpprist).ravel()
             # print(tn, fp, fn, tp)
 
-            from sklearn.metrics import roc_auc_score, accuracy_score
+            from sklearn.metrics import roc_auc_score, accuracy_score, roc_curve
             acc_score = accuracy_score(gt_prist, xgbpprist)
             auc_score = roc_auc_score(gt_prist, xgbpprist)
+            fpr, tpr, thresh = roc_curve(gt_prist, xgbpprist)
+            plt.plot(fpr, tpr)
 
-            from sklearn.metrics import plot_roc_curve, plot_confusion_matrix
-            plot_confusion_matrix(clf, df_prist, gt_prist)
+            # from sklearn.metrics import plot_roc_curve, plot_confusion_matrix
+            # plot_confusion_matrix(clf, df_prist, gt_prist, normalize="all")
             # plt.show()
-            plot_roc_curve(clf, df_prist, gt_prist)
-            # plt.show()
+            # plot_roc_curve(clf, df_prist, gt_prist)
+            # plt.show()            
 
             accs1.append(acc_score)
             aucs1.append(auc_score)
@@ -220,6 +222,8 @@ for num_questions in question_numbers:
         if mean_auc1 > 0.92 and mean_f11 > 0.92:
             models[model_num] = model
             model_num += 1
+            plt.show()
+        plt.cla()
 
     mean_acc = np.mean(accs)
     mean_auc = np.mean(aucs)
