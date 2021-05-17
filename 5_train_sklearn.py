@@ -219,7 +219,7 @@ for num_questions in question_numbers:
         model["auc_score"] = mean_auc1
         model["f1_score"] = mean_f11
 
-        if mean_auc1 > 0.92 and mean_f11 > 0.92:
+        if mean_auc1 > 0.90 and mean_f11 > 0.90:
             models[model_num] = model
             model_num += 1
             plt.show()
