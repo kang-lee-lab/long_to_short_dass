@@ -1,9 +1,7 @@
 # Feature importance based on the Gini importance of features in an Extra Tree (ET) classifier
 
 import pandas as pd
-import numpy as np
 import os
-import json
 
 target = "anxiety_status"
 

@@ -1,13 +1,10 @@
 # Model training for Scikit-learn based models 
 # (Random Forest, SVM, Logistic Regression, XGBoost)
 
-import sklearn
 import pandas as pd
 import numpy as np
 import scipy
 import os
-import copy
-import json
 import random
 import pickle
 import matplotlib.pyplot as plt
@@ -32,12 +29,12 @@ def confidence_interval(data, confidence=0.95):
     return m-h, m+h
 
 
-question_numbers = [8]
+question_numbers = [1, 2, 3, 4, 5, 6, 7, 8]         # Numbers of questions from DASS to run through
 target = "anxiety_status"
-models_to_train = 10
-models_per_question = 50
+models_to_train = 10        # Number of models for each number of questions from DASS
+models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
-model_type = "xgb"
+model_type = "xgb"          # Specify model type (xgb, rf, lr, svm)
 random.seed(20)
 
 ACCS = []
@@ -222,6 +219,11 @@ for num_questions in question_numbers:
         if mean_auc1 > 0.90 and mean_f11 > 0.90:
             models[model_num] = model
             model_num += 1
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.0])
+            plt.xlabel("False Positive Rate")
+            plt.ylabel("True Positive Rate")
+            plt.plot([0.0, 1.0], [0.0, 1.0], linestyle='--')
             plt.show()
         plt.cla()
 
