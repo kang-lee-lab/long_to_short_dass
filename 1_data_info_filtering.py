@@ -1,13 +1,11 @@
 # Data inspection and filtering
-# Kasdf
+
 import os
 import json
 import pandas as pd
 import pycountry_convert as pc
 
 data_folder = "./data"
-
-#######
 
 
 def encode_country(row):
