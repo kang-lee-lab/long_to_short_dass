@@ -148,4 +148,11 @@ to_drop = ["source", "screensize", "uniquenetworklocation",
             "introelapse", "testelapse", "surveyelapse", "familysize"]
 dataset = dataset.drop(to_drop, axis=1)
 
+for col in dataset.columns:
+    if "TIPI" in col or "VCL" in col:
+        dataset = dataset.drop([col], axis=1)
+    elif col[0] == "Q" and (col[-1] == "E" or col[-1] == "I"):
+        dataset = dataset.drop([col], axis=1)
+
+# Saved filtered dataset
 dataset.to_csv(os.path.join(data_folder, "data_filtered.csv"), index=None)

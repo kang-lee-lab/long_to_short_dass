@@ -2,15 +2,10 @@
 
 import pandas as pd
 import numpy as np
-import scipy
-import torch
-import time
-import math
-import json
 import os
-import random
 from sklearn.utils import resample
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.model_selection import train_test_split
 
 seed = 42
 data_folder = "./data"
@@ -65,7 +60,7 @@ def preprocess(data_df):
     region.columns = ["region_other", "region_east", "region_west"]
 
     # Combine and remove original columns
-    feats_df = feats_df.drop(["gender", "country", "region"], axis=1)
+    feats_df = feats_df.drop(["gender", "country", "region", "agegroup", "continent"], axis=1)
     feats_df = pd.concat([feats_df, gender, region], axis=1)
 
     # One-hot encode question answers
@@ -102,7 +97,7 @@ def train_val_test_split(feats_df, labels_df, rand=0, save=False):
     traintest_feats, valid_feats, traintest_labels, valid_labels = \
         train_test_split(feats_arr, labels_arr, test_size=0.10, random_state=seed)
     train_feats, holdout_feats, train_labels, holdout_labels = \
-        train_test_split(traintest_feats, traintest_labels, test_size=0.111, random_state=rand)
+        train_test_split(traintest_feats, traintest_labels, test_size=0.1111, random_state=rand)
 
     train_feats = train_feats.astype(float)
     train_labels = train_labels.astype(float)
@@ -119,7 +114,7 @@ def train_val_test_split(feats_df, labels_df, rand=0, save=False):
         holdout_feats.to_csv(os.path.join(data_folder, "holdout_feats.csv"), index=None)
         holdout_labels.to_csv(os.path.join(data_folder, "holdout_labels.csv"), index=None)
 
-    return train_feats, train_labels, valid_feats, valid_labels, test_feats, test_labels
+    return train_feats, train_labels, valid_feats, valid_labels, holdout_feats, holdout_labels
 
 
 if __name__ == "__main__":

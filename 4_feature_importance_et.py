@@ -2,31 +2,50 @@
 
 import pandas as pd
 import os
-
-target = "anxiety_status"
-
-data_folder = "./data"
-feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
-labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
-
-cols = ["gender_m", "gender_f", "region_other", 
-            "region_east", "region_west", "age_norm"]
-for q in range(1, 43):
-    for j in range(4):
-        cols.append("Q{0}A_{1}".format(q, j))
-features = feats_df[cols]
-labels = labels_df[[target]].copy()
-
-X = features 
-y = labels 
-
+from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import ExtraTreesClassifier
 import matplotlib.pyplot as plt
+
+data_folder = "./data"
+show_top = 20
+
+# Processed dataset
+features = pd.read_csv(os.path.join(data_folder, "features.csv"))
+labels = pd.read_csv(os.path.join(data_folder, "labels.csv"))
+
+# First fit a model for questions plus demographics
+features = features.drop(["gender_m", "gender_f", "region_other", "region_east", "region_west", "age_norm"], axis=1)  # Comment this line to include demographics
+
 model = ExtraTreesClassifier()
-model.fit(X, y)
+model.fit(features, labels)
 print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
 
 # Plot graph of feature importances for better visualization
-feat_importances = pd.Series(model.feature_importances_, index=X.columns)
-feat_importances.nlargest(15).plot(kind='barh')
+feat_importances = pd.Series(model.feature_importances_, index=features.columns)
+feat_importances.nlargest(show_top).plot(kind='barh')
+plt.show()
+
+
+# Unprocessed dataset
+df = pd.read_csv(os.path.join(data_folder, "data_filtered.csv"))
+features = df
+labels = df["anxiety_status"]
+
+label_encoder = LabelEncoder()
+region = label_encoder.fit_transform(features["region"])
+region = pd.DataFrame(region)
+region.columns = ["region1"]
+features = pd.concat([features, region], axis=1)
+
+# First fit a model for questions plus demographics
+features = features.drop(["anxiety_score", "anxiety_status", "country", "agegroup", "continent", "region"], axis=1)
+features = features.drop(["gender", "age", "region1"], axis=1)  # Comment this line to include demographics
+
+model = ExtraTreesClassifier()
+model.fit(features, labels)
+print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
+
+# Plot graph of feature importances for better visualization
+feat_importances = pd.Series(model.feature_importances_, index=features.columns)
+feat_importances.nlargest(show_top).plot(kind='barh')
 plt.show()
