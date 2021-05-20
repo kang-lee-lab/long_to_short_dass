@@ -141,6 +141,37 @@ print(dataset['continent'].value_counts())
 print(dataset['region'].value_counts())
 print(dataset['anxiety_status'].value_counts())
 
+print("\nBreakdown by continent:")
+df1 = dataset[dataset['continent'] == 'AS']
+print(df1['age'].mean(), df1['age'].std())
+print(df1['gender'].value_counts())
+print(df1['anxiety_status'].value_counts())
+
+df2 = dataset[dataset['continent'] == 'NA']
+print(df2['age'].mean(), df2['age'].std())
+print(df2['gender'].value_counts())
+print(df2['anxiety_status'].value_counts())
+
+df3 = dataset[dataset['continent'] == 'EU']
+print(df3['age'].mean(), df3['age'].std())
+print(df3['gender'].value_counts())
+print(df3['anxiety_status'].value_counts())
+
+df4 = dataset[dataset['continent'] == 'SA']
+print(df4['age'].mean(), df4['age'].std())
+print(df4['gender'].value_counts())
+print(df4['anxiety_status'].value_counts())
+
+df5 = dataset[dataset['continent'] == 'AF']
+print(df5['age'].mean(), df5['age'].std())
+print(df5['gender'].value_counts())
+print(df5['anxiety_status'].value_counts())
+
+df6 = dataset[dataset['continent'] == 'OC']
+print(df6['age'].mean(), df6['age'].std())
+print(df6['gender'].value_counts())
+print(df6['anxiety_status'].value_counts())
+
 # Drop unnecessary columns
 to_drop = ["source", "screensize", "uniquenetworklocation", 
             "education", "urban", "engnat", "hand", "religion", 
