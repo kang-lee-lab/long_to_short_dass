@@ -1,5 +1,5 @@
 # Model training for Scikit-learn based models 
-# (Random Forest, SVM, Logistic Regression, XGBoost)
+# (Random Forest, SVM, Logistic Regression, XGBoost, MLP)
 
 import pandas as pd
 import numpy as np
@@ -8,16 +8,14 @@ import os
 import random
 import pickle
 import matplotlib.pyplot as plt
-from sklearn import preprocessing
-from sklearn.metrics import classification_report
-from sklearn.metrics import balanced_accuracy_score
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import (classification_report, balanced_accuracy_score, confusion_matrix, 
+                roc_auc_score, accuracy_score, roc_curve, plot_roc_curve, plot_confusion_matrix)
 
-from sklearn.svm import SVC, LinearSVC
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC, LinearSVC
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
+from sklearn.neural_network import MLPClassifier
 
 
 def confidence_interval(data, confidence=0.95):
@@ -29,13 +27,15 @@ def confidence_interval(data, confidence=0.95):
     return m-h, m+h
 
 
-question_numbers = [1, 2, 3, 4, 5, 6, 7, 8]         # Numbers of questions from DASS to run through
+question_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]         # Numbers of questions from DASS to run through
 target = "anxiety_status"
-models_to_train = 10        # Number of models for each number of questions from DASS
+models_to_train = 1        # Number of models for each number of questions from DASS
 models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
-model_type = "xgb"          # Specify model type (xgb, rf, lr, svm)
-random.seed(20)
+model_type = "lr"          # Specify model type (xgb, rf, lr, svm, mlp)
+seed = 42
+random.seed(seed)
+
 
 ACCS = []
 AUCS = []
@@ -50,14 +50,13 @@ F1_95CI_U = []
 F1_95CI_D = []
 
 
-seed = 42
 data_folder = "./data"
 models_folder = "./models"
 
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18]
+questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18]          # Change the questions
 # [21, 7, 18, 11, 20, 4, 6, 1, 36, 40, 23] 
 
 # For different numbers of questions from DASS-42
@@ -99,7 +98,7 @@ for num_questions in question_numbers:
 
         labels = labels_df[[target]].copy()
 
-        np.random.seed(0)
+        np.random.seed(seed)
         shufId = np.random.permutation(int(len(labels)))
         index = int(test_split * len(labels.index))
 
@@ -109,7 +108,7 @@ for num_questions in question_numbers:
         gt_prist = labels.iloc[shufId[0:index]]
         gt_trainvalid = labels.iloc[shufId[index:-1]]
 
-        feats_df.iloc[shufId[0:index]].to_csv(os.path.join(data_folder, "prist_features.csv"), index=False)
+        df_prist.to_csv(os.path.join(data_folder, "prist_features.csv"), index=False)
         gt_prist.to_csv(os.path.join(data_folder, "prist_labels.csv"), index=False)
 
         accs1 = []
@@ -150,6 +149,9 @@ for num_questions in question_numbers:
                 md = 10
                 nj = -1
                 clf = XGBClassifier(n_estimators=nest, n_jobs=nj, max_depth=md, objective='reg:logistic')
+                # clf = GradientBoostingClassifier
+            elif model_type == "mlp":
+                clf = MLPClassifier()
             else:
                 print("INVALID MODEL TYPE")
             clf.fit(df_train, gt_train.values.ravel())
@@ -157,26 +159,23 @@ for num_questions in question_numbers:
             xgbpprist = clf.predict(df_prist)
             xgbpprist = pd.DataFrame(xgbpprist)
 
-            from sklearn.metrics import classification_report
+            # Evaluation
             target_names = ['negative', 'positive']
             cr = classification_report(gt_prist, xgbpprist, target_names=target_names, output_dict=True)
             precision = cr["weighted avg"]["precision"]
             recall = cr["weighted avg"]["recall"]
             f1score = cr["weighted avg"]["f1-score"]
 
-            # from sklearn.metrics import balanced_accuracy_score
             # balanced_accuracy_score(gt_prist, xgbpprist) # Average of Recall on both classes
             # from sklearn.metrics import confusion_matrix
             # tn, fp, fn, tp = confusion_matrix(gt_prist, xgbpprist).ravel()
             # print(tn, fp, fn, tp)
 
-            from sklearn.metrics import roc_auc_score, accuracy_score, roc_curve
             acc_score = accuracy_score(gt_prist, xgbpprist)
             auc_score = roc_auc_score(gt_prist, xgbpprist)
             fpr, tpr, thresh = roc_curve(gt_prist, xgbpprist)
             plt.plot(fpr, tpr)
 
-            # from sklearn.metrics import plot_roc_curve, plot_confusion_matrix
             # plot_confusion_matrix(clf, df_prist, gt_prist, normalize="all")
             # plt.show()
             # plot_roc_curve(clf, df_prist, gt_prist)
@@ -216,16 +215,21 @@ for num_questions in question_numbers:
         model["auc_score"] = mean_auc1
         model["f1_score"] = mean_f11
 
-        if mean_auc1 > 0.90 and mean_f11 > 0.90:
-            models[model_num] = model
-            model_num += 1
-            plt.xlim([0.0, 1.0])
-            plt.ylim([0.0, 1.0])
-            plt.xlabel("False Positive Rate")
-            plt.ylabel("True Positive Rate")
-            plt.plot([0.0, 1.0], [0.0, 1.0], linestyle='--')
-            plt.show()
-        plt.cla()
+        models[model_num] = model
+        model_num += 1
+
+        # if mean_auc1 > 0.90 and mean_f11 > 0.90:
+        #     models[model_num] = model
+        #     model_num += 1
+        #     plt.xlim([0.0, 1.0])
+        #     plt.ylim([0.0, 1.0])
+        #     plt.xlabel("False Positive Rate")
+        #     plt.ylabel("True Positive Rate")
+        #     plt.plot([0.0, 1.0], [0.0, 1.0], linestyle='--')
+        #     plt.show()
+        # plt.cla()
+
+    # plt.show()
 
     mean_acc = np.mean(accs)
     mean_auc = np.mean(aucs)
@@ -292,3 +296,14 @@ print("All F1s:", F1S)
 print("Stdev of F1s:", F1_STDEV)
 print("95th CI of F1s:", F1_95CI_U)
 print("95th CI of F1s:", F1_95CI_D)
+
+# Plot accuracy results
+plt.plot(ACCS, question_numbers)
+plt.plot(AUCS, question_numbers)
+plt.plot(F1S, question_numbers)
+plt.plot(PRES, question_numbers)
+plt.plot(RECS, question_numbers)
+plt.xlabel("Number of DASS questions")
+plt.ylabel("Accuracy")
+plt.legend(["Accuracy score", "AUC ROC score", "F1 score", "Precision", "Recall"])
+plt.show()
