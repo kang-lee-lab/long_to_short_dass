@@ -56,7 +56,8 @@ models_folder = "./models"
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18]          # Change the questions
+questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18] 
+#questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18]          # Change the questions
 # [21, 7, 18, 11, 20, 4, 6, 1, 36, 40, 23] 
 
 # For different numbers of questions from DASS-42
@@ -298,11 +299,12 @@ print("95th CI of F1s:", F1_95CI_U)
 print("95th CI of F1s:", F1_95CI_D)
 
 # Plot accuracy results
-plt.plot(ACCS, question_numbers)
-plt.plot(AUCS, question_numbers)
-plt.plot(F1S, question_numbers)
-plt.plot(PRES, question_numbers)
-plt.plot(RECS, question_numbers)
+plt.figure(figsize=(10,10)) # Make new figure
+plt.plot(question_numbers, ACCS)
+plt.plot(question_numbers, AUCS)
+plt.plot(question_numbers, F1S)
+plt.plot(question_numbers, PRES)
+plt.plot(question_numbers, RECS)
 plt.xlabel("Number of DASS questions")
 plt.ylabel("Accuracy")
 plt.legend(["Accuracy score", "AUC ROC score", "F1 score", "Precision", "Recall"])
