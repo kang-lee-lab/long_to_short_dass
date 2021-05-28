@@ -56,7 +56,8 @@ models_folder = "./models"
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18] 
+questions = [20, 9, 30, 11, 19, 2, 36, 28, 4, 23, 7, 27] # dropped q1, q18, q40
+# questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18] 
 #questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18]          # Change the questions
 # [21, 7, 18, 11, 20, 4, 6, 1, 36, 40, 23] 
 

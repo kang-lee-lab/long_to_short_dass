@@ -76,7 +76,7 @@ def categorize(row):
     # Classify as positive or negative (high or low) status based on threshold
     with open(os.path.join(data_folder, "dass42_scoring.json"), "r") as f:
         scoring = json.load(f)
-    threshold = scoring["anxiety_score"]["moderate"]["min"]  # moderate
+    threshold = scoring["anxiety_score"]["severe"]["min"]  # moderate
     return (1 if row["anxiety_score"] >= threshold else 0)
 
 
