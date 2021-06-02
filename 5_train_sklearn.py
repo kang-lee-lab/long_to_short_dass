@@ -29,7 +29,7 @@ def confidence_interval(data, confidence=0.95):
 
 question_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]         # Numbers of questions from DASS to run through
 target = "anxiety_status"
-models_to_train = 1        # Number of models for each number of questions from DASS
+models_to_train = 10        # Number of models for each number of questions from DASS
 models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
 model_type = "lr"          # Specify model type (xgb, rf, lr, svm, mlp)
@@ -76,6 +76,7 @@ for num_questions in question_numbers:
     auc_95ci_d = []
     f1_95ci_u = []
     f1_95ci_d = []
+    lst_comb =[]
 
     model_num = 0
     for a in range(models_to_train):
@@ -86,9 +87,17 @@ for num_questions in question_numbers:
                     "region_east", "region_west", "age_norm"]
 
         if num_questions == 1:
+            if a >= len(questions):
+                break
             question_nums = [questions[a]]
+            
         else:
-            question_nums = random.sample(questions, num_questions)
+            question_nums = []
+            #resample if already in list
+            while question_nums in lst_comb:
+                question_nums = random.sample(questions, num_questions)
+            lst_comb.append(question_nums)
+            
         for j in range(len(question_nums)):
             question_nums[j] = int(question_nums[j])
         question_nums.sort()
