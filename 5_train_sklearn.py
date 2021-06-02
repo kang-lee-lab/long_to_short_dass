@@ -92,15 +92,12 @@ for num_questions in question_numbers:
             question_nums = [questions[a]]
             
         else:
-            question_nums = []
+            question_nums = random.sample(questions, num_questions)
+            question_nums.sort()
             #resample if already in list
             while question_nums in lst_comb:
                 question_nums = random.sample(questions, num_questions)
             lst_comb.append(question_nums)
-            
-        for j in range(len(question_nums)):
-            question_nums[j] = int(question_nums[j])
-        question_nums.sort()
 
         for q in question_nums:
             for j in range(4):
