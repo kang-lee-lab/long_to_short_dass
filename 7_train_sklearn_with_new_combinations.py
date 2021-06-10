@@ -9,6 +9,7 @@ import os
 import random
 import pickle
 import matplotlib.pyplot as plt
+from generate_comb import generator 
 from sklearn.metrics import (classification_report, balanced_accuracy_score, confusion_matrix, 
                 roc_auc_score, accuracy_score, roc_curve, plot_roc_curve, plot_confusion_matrix)
 
@@ -34,36 +35,9 @@ target = "anxiety_status"
 models_to_train = 10     # Number of models for each number of questions from DASS
 models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
-model_type = "rf"          # Specify model type (xgb, rf, lr, svm, mlp)
+model_type = "lr"          # Specify model type (xgb, rf, lr, svm, mlp)
 seed = 42
 random.seed(seed)
-
-models_sets = pd.read_csv(os.path.join(data_folder, "models_for_training.csv"))
-
-models = {}
-converted_models = {}
-
-for i in range(1, 11):
-    models[i] = []
-    for j in range(len(models_sets['{0} DASS Questions'.format(i)])):
-        output = models_sets['{0} DASS Questions'.format(i)][j]
-        
-        models[i].append(output)
-
-for key in range(1, len(models)+1):
-    converted_models[key] = []
-    for sets in models[key]:
-        sets = sets.replace('(', '')
-        sets = sets.replace(')', '')
-        sets = sets.split(',')
-        if sets[-1] == '':
-            sets.pop()
-            
-        output = []
-        for q in sets:
-            output.append(int(q))
-            
-        converted_models[key].append(output)
 
 ACCS = []
 AUCS = []
@@ -83,8 +57,14 @@ labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 questions = [20, 9, 30, 11, 19, 2, 36, 28, 4, 23, 7, 27, 1, 18, 40]          # Change the questions
 # questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18] 
 
-# For different numbers of questions from DASS-42
+generated_models = {}
 
+for i in range(1, len(question_numbers)+1):
+    generated_models[i] = generator(questions, i, models_to_train)
+    
+print(generated_models)    
+
+# For different numbers of questions from DASS-42
 for num_questions in question_numbers:
     models = {}
 
@@ -109,8 +89,7 @@ for num_questions in question_numbers:
         cols = ["gender_m", "gender_f", "region_other", 
                     "region_east", "region_west", "age_norm"]
             
-        question_nums = converted_models[num_questions][a]    
-        question_nums.sort()
+        question_nums = generated_models[num_questions][a]    
 
         for q in question_nums:
             for j in range(4):
