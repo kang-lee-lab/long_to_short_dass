@@ -83,7 +83,7 @@ for num_questions in question_numbers:
     lst_comb =[]
     
     model_num = 0
-    for a in range(models_to_train):
+    for a in range(len(generated_models[num_questions])):
         model = {}
 
         print("Training model", a)
