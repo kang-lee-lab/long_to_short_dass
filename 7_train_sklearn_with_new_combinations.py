@@ -60,9 +60,10 @@ questions = [20, 9, 30, 11, 19, 2, 36, 28, 4, 23, 7, 27, 1, 18, 40]          # C
 generated_models = {}
 
 for i in range(1, len(question_numbers)+1):
-    generated_models[i] = generator(questions, i, models_to_train)
-    
-print(generated_models)    
+    if i == 1 and models_to_train > len(questions):
+        generated_models[i] = generator(questions, i, len(questions))
+    else:
+        generated_models[i] = generator(questions, i, models_to_train)  
 
 # For different numbers of questions from DASS-42
 for num_questions in question_numbers:
