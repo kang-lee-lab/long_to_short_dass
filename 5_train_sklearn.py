@@ -32,7 +32,7 @@ target = "anxiety_status"
 models_to_train = 10        # Number of models for each number of questions from DASS
 models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
-model_type = "lr"          # Specify model type (xgb, rf, lr, svm, mlp)
+model_type = "svm"          # Specify model type (xgb, rf, lr, svm, mlp)
 seed = 42
 random.seed(seed)
 
@@ -56,10 +56,9 @@ models_folder = "./models"
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-questions = [20, 9, 30, 11, 19, 2, 36, 28, 4, 23, 7, 27] # dropped q1, q18, q40
-# questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18] 
-#questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18]          # Change the questions
-# [21, 7, 18, 11, 20, 4, 6, 1, 36, 40, 23] 
+#questions = [20, 9, 30, 11, 19, 2, 36, 28, 4, 23, 7, 27] # dropped q1, q18, q40
+questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18] 
+
 
 # For different numbers of questions from DASS-42
 for num_questions in question_numbers:
@@ -149,7 +148,7 @@ for num_questions in question_numbers:
             if model_type == "lr":
                 clf = LogisticRegression(random_state=0)
             elif model_type == "svm":
-                clf = SVC()
+                clf = SVC(cache_size=7000)
             elif model_type == "rf":
                 clf = RandomForestClassifier(max_depth=4, random_state=0)
             elif model_type == "xgb":
