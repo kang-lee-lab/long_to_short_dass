@@ -32,8 +32,8 @@ def confidence_interval(data, confidence=0.95):
 
 question_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]         # Numbers of questions from DASS to run through
 target = "anxiety_status"
-models_to_train = 10     # Number of models for each number of questions from DASS
-models_per_question = 50    # Number of ensembles per model
+models_to_train = 20     # Number of models for each number of questions from DASS
+models_per_question = 60    # Number of ensembles per model
 test_split = 0.1
 model_type = "lr"          # Specify model type (xgb, rf, lr, svm, mlp)
 seed = 42
@@ -54,8 +54,7 @@ F1_95CI_D = []
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-questions = [20, 9, 30, 11, 19, 2, 36, 28, 4, 23, 7, 27, 1, 18, 40]          # Change the questions
-# questions = [15, 21, 41, 1, 32, 13, 36, 31, 4, 18] 
+questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18] 
 
 generated_models = {}
 
@@ -87,8 +86,9 @@ for num_questions in question_numbers:
         model = {}
 
         print("Training model", a)
-        cols = ["gender_m", "gender_f", "region_other", 
-                    "region_east", "region_west", "age_norm"]
+        cols = ["education_0", "education_1", "education_2", "education_3", "education_4",
+                    "urban_0", "urban_1", "urban_2", "urban_3",
+                    "age_norm"]
             
         question_nums = generated_models[num_questions][a]    
 
@@ -144,12 +144,9 @@ for num_questions in question_numbers:
             elif model_type == "svm":
                 clf = SVC()
             elif model_type == "rf":
-                clf = RandomForestClassifier(max_depth=4, random_state=0, n_estimators=100)
+                clf = RandomForestClassifier(max_depth=None, max_features=18, min_samples_split=2, n_estimators=200, random_state=0)
             elif model_type == "xgb":
-                nest = 100
-                md = 10
-                nj = -1
-                clf = XGBClassifier(n_estimators=nest, n_jobs=nj, max_depth=md, objective='reg:logistic')
+                clf = XGBClassifier(n_estimators=125, max_depth = 11, objective="reg:logistic", n_jobs=-1, eta=0.29)
                 # clf = GradientBoostingClassifier
             elif model_type == "mlp":
                 clf = MLPClassifier()
