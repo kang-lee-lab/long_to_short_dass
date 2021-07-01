@@ -8,6 +8,17 @@ def generator(q_lst: list, num_DASS: int, models_to_train: int):
     # lst: full list of questions to choose from
     # models_to_train: total number of models
     # num_dass: number of questions to choose from lst
+    # Description: The function generates a list of models, size models_to_train, based on
+    #              questions from q_lst. Each of the models are list of size num_DASS. The 
+    #              list of models are generated in a way such that there are least amount
+    #              of overlapping elements between each models.
+    #              It will keep count of how many times a question has been selected, and
+    #              randomly selects from a list of questions whose counters are less than 
+    #              the maximum count. If all quetsions have the same counter, it will randomly 
+    #              select from the full list of questions.
+    #              
+    #>>>generator([1,2,3,4], 2, 2)
+    #>>>[[3, 4], [1, 2]]
     
     #Initialize counter
     question_counter = {}    
@@ -27,6 +38,7 @@ def generator(q_lst: list, num_DASS: int, models_to_train: int):
     
     while len(models_set) < models_to_train:
         new_model = []
+
         while len(new_model) < num_DASS:
             min_count_questions = find_minimum(question_counter, max_count)
             
@@ -63,6 +75,8 @@ def update_max_count(question_counter: dict):
     #Update the maximum counter
     values = question_counter.values()
     max_count = max(values)
+
+    # If every questions have been selected equal amount of times, increase counter.
     if max(values) == min(values):
         max_count += 1      
         
