@@ -133,6 +133,13 @@ dataset = dataset.drop(dataset[(dataset['gender'] == 0) | (dataset['gender'] == 
 dataset = dataset[dataset['age'] >= 18]  # Adults only
 dataset = dataset[dataset['region'] != ""]  # Must have region
 
+# Remove data with countries that have strict data privacy laws (for public use only)
+dataset = dataset[dataset['continent'] != "EU"]
+dataset = dataset[dataset['country'] != "CH"]
+dataset = dataset[dataset['country'] != "IN"]
+dataset = dataset[dataset['country'] != "JA"]
+dataset = dataset[dataset['country'] != "AU"]
+
 print("\nAfter filtering:")
 print(dataset['gender'].value_counts())
 print(dataset['agegroup'].value_counts())

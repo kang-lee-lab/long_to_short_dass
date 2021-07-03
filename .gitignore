@@ -1,3 +1,4 @@
 *.csv
 *.bin
 *__pycache__*
+*.png
