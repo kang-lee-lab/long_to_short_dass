@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 data_folder = "./data"
 show_top = 20
 
-# Processed dataset
+# One-hot encoded dataset
 features = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
@@ -18,15 +18,16 @@ features = features.drop(["gender_m", "gender_f", "region_other", "region_east",
 
 model = ExtraTreesClassifier()
 model.fit(features, labels)
-print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
+# print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
 
 # Plot graph of feature importances for better visualization
 feat_importances = pd.Series(model.feature_importances_, index=features.columns)
 feat_importances.nlargest(show_top).plot(kind='barh')
+print(feat_importances.nlargest(show_top))
 plt.show()
 
 
-# Unprocessed dataset
+# Not one-hot encoded dataset
 df = pd.read_csv(os.path.join(data_folder, "data_filtered.csv"))
 features = df
 labels = df["anxiety_status"]
@@ -43,9 +44,10 @@ features = features.drop(["gender", "age", "region1"], axis=1)  # Comment this l
 
 model = ExtraTreesClassifier()
 model.fit(features, labels)
-print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
+# print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
 
 # Plot graph of feature importances for better visualization
 feat_importances = pd.Series(model.feature_importances_, index=features.columns)
 feat_importances.nlargest(show_top).plot(kind='barh')
+print(feat_importances.nlargest(show_top))
 plt.show()

@@ -1,6 +1,7 @@
 # Model training for Scikit-learn based models 
 # (Random Forest, SVM, Logistic Regression, XGBoost, MLP)
 
+import argparse
 import pandas as pd
 import numpy as np
 import scipy
@@ -27,12 +28,22 @@ def confidence_interval(data, confidence=0.95):
     return m-h, m+h
 
 
-question_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]         # Numbers of questions from DASS to run through
+parser = argparse.ArgumentParser(description='Model type')
+parser.add_argument('--type',
+                    default='lr',
+                    const='lr',
+                    nargs='?',
+                    choices=['lr', 'xgb', 'rf', 'svm', 'mlp'],
+                    help='Model types: lr (Logistic Regression), xgb (XGBoost), rf (Random Forest), svm (Support Vector Machine), mlp (Multilayer Perceptron Neural Network). Default: lr')
+args = parser.parse_args()
+
+
+question_numbers = [1, 2, 3, 4, 5, 6, 7, 8]         # Numbers of questions from DASS to run through
 target = "anxiety_status"
 models_to_train = 10        # Number of models for each number of questions from DASS
-models_per_question = 50    # Number of ensembles per model
+models_per_question = 20    # Number of ensembles per model
 test_split = 0.1
-model_type = "svm"          # Specify model type (xgb, rf, lr, svm, mlp)
+model_type = args.type      # Specify model type (xgb, rf, lr, svm, mlp)
 seed = 42
 random.seed(seed)
 
@@ -56,8 +67,7 @@ models_folder = "./models"
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-#questions = [20, 9, 30, 11, 19, 2, 36, 28, 4, 23, 7, 27] # dropped q1, q18, q40
-questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18] 
+questions = [20, 9, 30, 11, 19, 2, 36, 28, 4, 23]
 
 
 # For different numbers of questions from DASS-42

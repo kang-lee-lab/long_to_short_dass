@@ -1,6 +1,6 @@
+Cython
 numpy
 pandas
-torch
 sklearn
 scipy
 pycountry_convert

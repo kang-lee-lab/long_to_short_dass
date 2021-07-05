@@ -8,7 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 data_folder = "./data"
 show_top = 20
 
-# Processed dataset
+# One-hot encoded dataset
 train_feats = pd.read_csv(os.path.join(data_folder, "features.csv"))
 train_feats = train_feats.drop(["age_norm", "gender_m", "gender_f", "region_other", "region_east", "region_west"], axis=1)  # Comment this line to include demographics
 
@@ -17,7 +17,7 @@ print(pymrmr.mRMR(train_feats, 'MIQ', show_top))
 # print(pymrmr.mRMR(train_feats, 'MID', show_top))
 
 
-# Unprocessed dataset
+# Not one-hot encoded dataset
 train_feats = pd.read_csv(os.path.join(data_folder, "data_filtered.csv"))
 
 label_encoder = LabelEncoder()
