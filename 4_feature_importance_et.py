@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 
 data_folder = "./data"
 show_top = 20
+target = "anxiety"   # "depression" or "stress"
+
 
 # Processed dataset
 features = pd.read_csv(os.path.join(data_folder, "features.csv"))
@@ -38,7 +40,7 @@ region.columns = ["region1"]
 features = pd.concat([features, region], axis=1)
 
 # First fit a model for questions plus demographics
-features = features.drop(["anxiety_score", "anxiety_status", "country", "agegroup", "continent", "region"], axis=1)
+features = features.drop(["{}_score".format(target), "{}_status".format(target), "country", "agegroup", "continent", "region"], axis=1)
 features = features.drop(["gender", "age", "region1"], axis=1)  # Comment this line to include demographics
 
 model = ExtraTreesClassifier()

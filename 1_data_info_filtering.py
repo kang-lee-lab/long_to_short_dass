@@ -6,6 +6,7 @@ import pandas as pd
 import pycountry_convert as pc
 
 data_folder = "./data"
+target = "anxiety"   # "depression" or "stress"
 
 
 def encode_country(row):
@@ -60,32 +61,32 @@ def encode_age(row):
     return agegroup
 
 
-def calc_anx(row):
-    # Calculate DASS-42 anxiety score
+def calc_score(row):
+    # Calculate DASS-42 score for the target
     with open(os.path.join(data_folder, "dass42_qcategories.json"), "r") as f:
         categories = json.load(f)
-    anxiety_questions = [key for key in categories if categories[key] == "anxiety"]
+    target_questions = [key for key in categories if categories[key] == target]
 
     score = 0
-    for qnum in anxiety_questions:
+    for qnum in target_questions:
         score += int(row["Q{}A".format(qnum)])
-    return score - len(anxiety_questions)
+    return score - len(target_questions)
 
 
 def categorize(row):
     # Classify as positive or negative (high or low) status based on threshold
     with open(os.path.join(data_folder, "dass42_scoring.json"), "r") as f:
         scoring = json.load(f)
-    threshold = scoring["anxiety_score"]["severe"]["min"]  # moderate
-    return (1 if row["anxiety_score"] >= threshold else 0)
+    threshold = scoring["{}_score".format(target)]["severe"]["min"]  # moderate
+    return (1 if row["{}_score".format(target)] >= threshold else 0)
 
 
 dataset = pd.read_csv("./data/data.csv", sep='\t')
 dataset["agegroup"] = dataset.apply(lambda row: encode_age(row), axis=1)
 dataset["continent"] = dataset.apply(lambda row: encode_continent(row), axis=1)
 dataset["region"] = dataset.apply(lambda row: encode_country(row), axis=1)
-dataset["anxiety_score"] = dataset.apply(lambda row: calc_anx(row), axis=1)
-dataset["anxiety_status"] = dataset.apply(lambda row: categorize(row), axis=1)
+dataset["{}_score".format(target)] = dataset.apply(lambda row: calc_score(row), axis=1)
+dataset["{}_status".format(target)] = dataset.apply(lambda row: categorize(row), axis=1)
 
 print("Before filtering:")
 print(dataset['gender'].value_counts())
@@ -94,38 +95,38 @@ print(dataset['age'].mean(), dataset['age'].std())
 print(dataset['continent'].value_counts())
 print(dataset['region'].value_counts())
 print(dataset['agegroup'].value_counts())
-print(dataset['anxiety_status'].value_counts())
+print(dataset["{}_status".format(target)].value_counts())
 
 print("\nBreakdown by continent:")
 df1 = dataset[dataset['continent'] == 'AS']
 print(df1['age'].mean(), df1['age'].std())
 print(df1['gender'].value_counts())
-print(df1['anxiety_status'].value_counts())
+print(df1["{}_status".format(target)].value_counts())
 
 df2 = dataset[dataset['continent'] == 'NA']
 print(df2['age'].mean(), df2['age'].std())
 print(df2['gender'].value_counts())
-print(df2['anxiety_status'].value_counts())
+print(df2["{}_status".format(target)].value_counts())
 
 df3 = dataset[dataset['continent'] == 'EU']
 print(df3['age'].mean(), df3['age'].std())
 print(df3['gender'].value_counts())
-print(df3['anxiety_status'].value_counts())
+print(df3["{}_status".format(target)].value_counts())
 
 df4 = dataset[dataset['continent'] == 'SA']
 print(df4['age'].mean(), df4['age'].std())
 print(df4['gender'].value_counts())
-print(df4['anxiety_status'].value_counts())
+print(df4["{}_status".format(target)].value_counts())
 
 df5 = dataset[dataset['continent'] == 'AF']
 print(df5['age'].mean(), df5['age'].std())
 print(df5['gender'].value_counts())
-print(df5['anxiety_status'].value_counts())
+print(df5["{}_status".format(target)].value_counts())
 
 df6 = dataset[dataset['continent'] == 'OC']
 print(df6['age'].mean(), df6['age'].std())
 print(df6['gender'].value_counts())
-print(df6['anxiety_status'].value_counts())
+print(df6["{}_status".format(target)].value_counts())
 
 
 # Filter data
@@ -139,38 +140,38 @@ print(dataset['agegroup'].value_counts())
 print(dataset['age'].mean(), dataset['age'].std())
 print(dataset['continent'].value_counts())
 print(dataset['region'].value_counts())
-print(dataset['anxiety_status'].value_counts())
+print(dataset["{}_status".format(target)].value_counts())
 
 print("\nBreakdown by continent:")
 df1 = dataset[dataset['continent'] == 'AS']
 print(df1['age'].mean(), df1['age'].std())
 print(df1['gender'].value_counts())
-print(df1['anxiety_status'].value_counts())
+print(df1["{}_status".format(target)].value_counts())
 
 df2 = dataset[dataset['continent'] == 'NA']
 print(df2['age'].mean(), df2['age'].std())
 print(df2['gender'].value_counts())
-print(df2['anxiety_status'].value_counts())
+print(df2["{}_status".format(target)].value_counts())
 
 df3 = dataset[dataset['continent'] == 'EU']
 print(df3['age'].mean(), df3['age'].std())
 print(df3['gender'].value_counts())
-print(df3['anxiety_status'].value_counts())
+print(df3["{}_status".format(target)].value_counts())
 
 df4 = dataset[dataset['continent'] == 'SA']
 print(df4['age'].mean(), df4['age'].std())
 print(df4['gender'].value_counts())
-print(df4['anxiety_status'].value_counts())
+print(df4["{}_status".format(target)].value_counts())
 
 df5 = dataset[dataset['continent'] == 'AF']
 print(df5['age'].mean(), df5['age'].std())
 print(df5['gender'].value_counts())
-print(df5['anxiety_status'].value_counts())
+print(df5["{}_status".format(target)].value_counts())
 
 df6 = dataset[dataset['continent'] == 'OC']
 print(df6['age'].mean(), df6['age'].std())
 print(df6['gender'].value_counts())
-print(df6['anxiety_status'].value_counts())
+print(df6["{}_status".format(target)].value_counts())
 
 # Drop unnecessary columns
 to_drop = ["source", "screensize", "uniquenetworklocation", 

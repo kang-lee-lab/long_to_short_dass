@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 
 seed = 42
 data_folder = "./data"
+target = "anxiety"   # "depression" or "stress"
 
 
 def preprocess(data_df):
@@ -16,8 +17,8 @@ def preprocess(data_df):
     Pre-processing: rebalance, one-hot encode, normalize
     """
     # Separate majority and minority classes
-    df_majority = data_df[data_df["anxiety_status"] == 1]
-    df_minority = data_df[data_df["anxiety_status"] == 0]
+    df_majority = data_df[data_df["{}_status".format(target)] == 1]
+    df_minority = data_df[data_df["{}_status".format(target)] == 0]
     
     # Upsample minority class
     data_minority = resample(df_minority, 
@@ -35,8 +36,8 @@ def preprocess(data_df):
     data_df = data_df.reset_index(drop=True)
 
     # Extract the label columns; separate features and labels
-    labels_df = data_df[["anxiety_status"]].copy()
-    feats_df = data_df.drop(["anxiety_score", "anxiety_status"], axis=1)
+    labels_df = data_df[["{}_status".format(target)]].copy()
+    feats_df = data_df.drop(["{}_score".format(target), "{}_status".format(target)], axis=1)
 
     # z-score normalization
     def z_score_norm(row, col, mean, stdev):
