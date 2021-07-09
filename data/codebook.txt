@@ -1,5 +1,5 @@
 gender				 1=Male, 2=Female, 3=Other
-age				     Integer representing the user's age at the time of the survey
+age            Integer representing the user's age at the time of the survey
 country				 ISO country code of where the user resides
 
 Q1	I found myself getting upset by quite trivial things.
@@ -31,7 +31,7 @@ Q26	I felt down-hearted and blue.
 Q27	I found that I was very irritable.
 Q28	I felt I was close to panic.
 Q29	I found it hard to calm down after something upset me.
-Q30	I feared that I would be &quot;thrown&quot; by some trivial but unfamiliar task.
+Q30	I feared that I would be "thrown" by some trivial but unfamiliar task.
 Q31	I was unable to become enthusiastic about anything.
 Q32	I found it difficult to tolerate interruptions to what I was doing.
 Q33	I was in a state of nervous tension.
