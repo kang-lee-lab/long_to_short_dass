@@ -1,6 +1,6 @@
 gender				 1=Male, 2=Female, 3=Other
-age				
-country				 ISO country code of where the user connected from
+age				     
+country				 ISO country code of where the user resides
 
 Q1	I found myself getting upset by quite trivial things.
 Q2	I was aware of dryness of my mouth.
@@ -44,6 +44,3 @@ Q39	I found myself getting agitated.
 Q40	I was worried about situations in which I might panic and make a fool of myself.
 Q41	I experienced trembling (eg, in the hands).
 Q42	I found it difficult to work up the initiative to do things.
-
-
-
