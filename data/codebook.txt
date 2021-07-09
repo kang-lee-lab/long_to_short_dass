@@ -1,12 +1,12 @@
 gender				 1=Male, 2=Female, 3=Other
-age				     
+age				     Integer representing the user's age at the time of the survey
 country				 ISO country code of where the user resides
 
 Q1	I found myself getting upset by quite trivial things.
 Q2	I was aware of dryness of my mouth.
 Q3	I couldn't seem to experience any positive feeling at all.
 Q4	I experienced breathing difficulty (eg, excessively rapid breathing, breathlessness in the absence of physical exertion).
-Q5	I just couldn&#39;t seem to get going.
+Q5	I just couldn't seem to get going.
 Q6	I tended to over-react to situations.
 Q7	I had a feeling of shakiness (eg, legs going to give way).
 Q8	I found it difficult to relax.
@@ -18,14 +18,14 @@ Q13	I felt sad and depressed.
 Q14	I found myself getting impatient when I was delayed in any way (eg, elevators, traffic lights, being kept waiting).
 Q15	I had a feeling of faintness.
 Q16	I felt that I had lost interest in just about everything.
-Q17	I felt I wasn&#39;t worth much as a person.
+Q17	I felt I wasn't worth much as a person.
 Q18	I felt that I was rather touchy.
 Q19	I perspired noticeably (eg, hands sweaty) in the absence of high temperatures or physical exertion.
 Q20	I felt scared without any good reason.
-Q21	I felt that life wasn&#39;t worthwhile.
+Q21	I felt that life wasn't worthwhile.
 Q22	I found it hard to wind down.
 Q23	I had difficulty in swallowing.
-Q24	I couldn&#39;t seem to get any enjoyment out of the things I did.
+Q24	I couldn't seem to get any enjoyment out of the things I did.
 Q25	I was aware of the action of my heart in the absence of physical exertion (eg, sense of heart rate increase, heart missing a beat).
 Q26	I felt down-hearted and blue.
 Q27	I found that I was very irritable.
