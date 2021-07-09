@@ -2,7 +2,7 @@
 
 Code for experiments conducted for the study of Developing Efficient, Convenient, and Non-repetitive Short Assessments to Replace a Long Assessment with Similar Accuracies, in the context of predicting the levels of anxiety in adults.
 
-A demo dataset (`data_filtered.csv`) is included under the `/data` folder. The full dataset used for this study cannot be released here due to data privacy laws from certain countries (e.g. EU countries) prohibiting the distribution of data containing personal identifiable information (e.g. date of birth and gender) without consent.
+A demo dataset (`data_filtered.csv`) is included under the `/data` folder. The full dataset used for this study cannot be released here due to data privacy laws from certain countries (e.g. EU countries) prohibiting the distribution of data containing personal identifiable information (e.g. date of birth and gender) without consent. The sample dataset is the same in structure to the full dataset, and the result of running the program code on the sample dataset approximates the result from running the code on the full dataset.
 
 The relevant code are all in the Master branch. Please do not look at the other branches. The experiment code files are numbered in the order of steps.
 
