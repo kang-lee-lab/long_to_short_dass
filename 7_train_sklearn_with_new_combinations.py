@@ -36,7 +36,7 @@ target = "depression"   # "anxiety", "depression" or "stress"
 models_to_train = 10     # Number of models for each number of questions from DASS
 models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
-model_type = "xgb"          # Specify model type (xgb, rf, lr, svm, mlp)
+model_type = "nb"          # Specify model type (xgb, rf, lr, svm, mlp)
 seed = 42
 random.seed(seed)
 
