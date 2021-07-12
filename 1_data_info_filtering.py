@@ -6,7 +6,7 @@ import pandas as pd
 import pycountry_convert as pc
 
 data_folder = "./data"
-target = "anxiety"   # "depression" or "stress"
+target = "depression"   # "anxiety", "depression" or "stress"
 
 
 def encode_country(row):

@@ -7,8 +7,8 @@ from sklearn.ensemble import ExtraTreesClassifier
 import matplotlib.pyplot as plt
 
 data_folder = "./data"
-show_top = 20
-target = "anxiety"   # "depression" or "stress"
+show_top = 30
+target = "depression"   # "anxiety", "depression" or "stress"
 
 
 # Processed dataset
@@ -16,7 +16,7 @@ features = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
 # First fit a model for questions plus demographics
-features = features.drop(["gender_m", "gender_f", "region_other", "region_east", "region_west", "age_norm"], axis=1)  # Comment this line to include demographics
+#features = features.drop(["gender_m", "gender_f", "region_other", "region_east", "region_west", "age_norm"], axis=1)  # Comment this line to include demographics
 
 model = ExtraTreesClassifier()
 model.fit(features, labels)
@@ -31,7 +31,7 @@ plt.show()
 # Unprocessed dataset
 df = pd.read_csv(os.path.join(data_folder, "data_filtered.csv"))
 features = df
-labels = df["anxiety_status"]
+labels = df["{}_status".format(target)]
 
 label_encoder = LabelEncoder()
 region = label_encoder.fit_transform(features["region"])
@@ -41,7 +41,7 @@ features = pd.concat([features, region], axis=1)
 
 # First fit a model for questions plus demographics
 features = features.drop(["{}_score".format(target), "{}_status".format(target), "country", "agegroup", "continent", "region"], axis=1)
-features = features.drop(["gender", "age", "region1"], axis=1)  # Comment this line to include demographics
+#features = features.drop(["gender", "age", "region1"], axis=1)  # Comment this line to include demographics
 
 model = ExtraTreesClassifier()
 model.fit(features, labels)

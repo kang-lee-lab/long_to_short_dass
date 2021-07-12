@@ -26,9 +26,8 @@ def confidence_interval(data, confidence=0.95):
     h = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n-1)
     return m-h, m+h
 
-
+target = "depression"   # "anxiety", "depression" or "stress"
 question_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]         # Numbers of questions from DASS to run through
-target = "anxiety_status"
 models_to_train = 10        # Number of models for each number of questions from DASS
 models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
@@ -56,7 +55,7 @@ models_folder = "./models"
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18] 
+questions = [13, 16, 3, 34, 24, 22, 27, 36, 40, 26, 20, 17, 11, 30, 18]
 
 
 # For different numbers of questions from DASS-42
@@ -102,7 +101,7 @@ for num_questions in question_numbers:
                 cols.append("Q{0}A_{1}".format(q, j))
         features = feats_df[cols]
 
-        labels = labels_df[[target]].copy()
+        labels = labels_df[['{}_status'.format(target)]].copy()
 
         np.random.seed(seed)
         shufId = np.random.permutation(int(len(labels)))
