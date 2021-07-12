@@ -145,7 +145,7 @@ for num_questions in question_numbers:
 
             clf1 = LogisticRegression(random_state=0)
             clf2 = SVC(cache_size=7000)
-            clf3 = RandomForestClassifier(max_depth=None, max_features=18, min_samples_split=2, n_estimators=200, random_state=0)
+            clf3 = RandomForestClassifier(max_depth=None, min_samples_split=2, n_estimators=200, random_state=0)
             clf4 = XGBClassifier(n_estimators=125, max_depth=11, objective="reg:logistic", n_jobs=-1, eta=0.29)
             # clf4 = GradientBoostingClassifier()
             clf5 = MLPClassifier()
