@@ -18,6 +18,7 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.naive_bayes import (GaussianNB, MultinomialNB, ComplementNB, BernoulliNB, CategoricalNB)
 
 data_folder = "./data"
 models_folder = "./models"
@@ -149,6 +150,12 @@ for num_questions in question_numbers:
                 # clf = GradientBoostingClassifier
             elif model_type == "mlp":
                 clf = MLPClassifier()
+            elif model_type == "nb":
+                clf = GaussianNB()
+                # clf = MultinomialNB()
+                # clf = ComplementNB()
+                # clf = BernoulliNB()
+                # clf = CategoricalNB()
             else:
                 print("INVALID MODEL TYPE")
             clf.fit(df_train, gt_train.values.ravel())

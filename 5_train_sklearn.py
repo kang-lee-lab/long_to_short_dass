@@ -16,6 +16,7 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.naive_bayes import (GaussianNB, MultinomialNB, ComplementNB, BernoulliNB, CategoricalNB)
 
 
 def confidence_interval(data, confidence=0.95):
@@ -31,7 +32,7 @@ question_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]         # Numbers of question
 models_to_train = 10        # Number of models for each number of questions from DASS
 models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
-model_type = "lr"          # Specify model type (xgb, rf, lr, svm, mlp)
+model_type = "lr"          # Specify model type (xgb, rf, lr, svm, mlp, nb)
 seed = 42
 random.seed(seed)
 
@@ -154,6 +155,13 @@ for num_questions in question_numbers:
                 # clf = GradientBoostingClassifier
             elif model_type == "mlp":
                 clf = MLPClassifier()
+            elif model_type == "nb":
+                clf = GaussianNB()
+                # clf = MultinomialNB()
+                # clf = ComplementNB()
+                # clf = BernoulliNB()
+                # clf = CategoricalNB()
+                
             else:
                 print("INVALID MODEL TYPE")
             clf.fit(df_train, gt_train.values.ravel())
