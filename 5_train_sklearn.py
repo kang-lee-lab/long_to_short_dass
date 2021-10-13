@@ -12,9 +12,10 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import (classification_report, balanced_accuracy_score, confusion_matrix, 
                 roc_auc_score, accuracy_score, roc_curve, plot_roc_curve, plot_confusion_matrix)
 
+from sklearn.naive_bayes import GaussianNB
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC, LinearSVC
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, StackingClassifier
 from xgboost import XGBClassifier
 from sklearn.neural_network import MLPClassifier
 
@@ -33,15 +34,15 @@ parser.add_argument('--type',
                     default='lr',
                     const='lr',
                     nargs='?',
-                    choices=['lr', 'xgb', 'rf', 'svm', 'mlp'],
-                    help='Model types: lr (Logistic Regression), xgb (XGBoost), rf (Random Forest), svm (Support Vector Machine), mlp (Multilayer Perceptron Neural Network). Default: lr')
+                    choices=['lr', 'xgb', 'rf', 'svm', 'mlp', 'gnb', 'ensemble'],
+                    help='Model types: lr (Logistic Regression), xgb (XGBoost), rf (Random Forest), svm (Support Vector Machine), mlp (Multilayer Perceptron Neural Network), gnb (Gaussian Naive Bayes), ensemble (Stacked Generalization Ensemble). Default: lr')
 args = parser.parse_args()
 
 
 question_numbers = [1, 2, 3, 4, 5, 6, 7, 8]         # Numbers of questions from DASS to run through
 target = "anxiety_status"
 models_to_train = 10        # Number of models for each number of questions from DASS
-models_per_question = 20    # Number of ensembles per model
+models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
 model_type = args.type      # Specify model type (xgb, rf, lr, svm, mlp)
 seed = 42
@@ -157,18 +158,27 @@ for num_questions in question_numbers:
 
             if model_type == "lr":
                 clf = LogisticRegression(random_state=0)
+            elif model_type == "gnb":
+                clf = GaussianNB()
             elif model_type == "svm":
                 clf = SVC(cache_size=7000)
             elif model_type == "rf":
-                clf = RandomForestClassifier(max_depth=4, random_state=0)
+                clf = RandomForestClassifier(max_depth=None, max_features=18, min_samples_split=2, n_estimators=200, random_state=0)
             elif model_type == "xgb":
-                nest = 100
-                md = 10
-                nj = -1
-                clf = XGBClassifier(n_estimators=nest, n_jobs=nj, max_depth=md, objective='reg:logistic')
+                clf = XGBClassifier(n_estimators=125, max_depth = 11, objective="reg:logistic", n_jobs=-1, eta=0.29)
                 # clf = GradientBoostingClassifier
             elif model_type == "mlp":
                 clf = MLPClassifier()
+            elif model_type == "ensemble":
+                clf1 = LogisticRegression()
+                clf2 = SVC()
+                clf3 = RandomForestClassifier()
+                clf4 = XGBClassifier()
+                # clf4 = GradientBoostingClassifier()
+                clf5 = MLPClassifier()
+                clf6 = GaussianNB()
+                clf = StackingClassifier([('lr', clf1), ('svm', clf2), ('rf', clf3), ('xgb', clf4), ('mlp', clf5), ('gnb', clf6)], 
+                                        final_estimator=LogisticRegression())
             else:
                 print("INVALID MODEL TYPE")
             clf.fit(df_train, gt_train.values.ravel())
