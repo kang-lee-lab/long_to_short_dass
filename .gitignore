@@ -1,3 +1,5 @@
 *.csv
 *.bin
 *__pycache__*
+*.txt
+*.zip

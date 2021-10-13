@@ -13,7 +13,7 @@ from sklearn.metrics import (classification_report, balanced_accuracy_score, con
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC, LinearSVC
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, StackingClassifier
 from xgboost import XGBClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import (GaussianNB, MultinomialNB, ComplementNB, BernoulliNB, CategoricalNB)
@@ -27,12 +27,12 @@ def confidence_interval(data, confidence=0.95):
     h = se * scipy.stats.t.ppf((1 + confidence) / 2.0, n-1)
     return m-h, m+h
 
-target = "depression"   # "anxiety", "depression" or "stress"
-question_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]         # Numbers of questions from DASS to run through
-models_to_train = 10        # Number of models for each number of questions from DASS
+target = "anxiety"   # "anxiety", "depression" or "stress"
+question_numbers = [5]         # Numbers of questions from DASS to run through
+models_to_train = 1        # Number of models for each number of questions from DASS
 models_per_question = 50    # Number of ensembles per model
 test_split = 0.1
-model_type = "lr"          # Specify model type (xgb, rf, lr, svm, mlp, nb)
+model_type = "rf"          # Specify model type (xgb, rf, lr, svm, mlp, nb, ensemble)
 seed = 42
 random.seed(seed)
 
@@ -56,8 +56,9 @@ models_folder = "./models"
 feats_df = pd.read_csv(os.path.join(data_folder, "features.csv"))
 labels_df = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-questions = [13, 16, 3, 34, 24, 22, 27, 36, 40, 26, 20, 17, 11, 30, 18]
-
+# questions = [13, 16, 3, 34, 24, 22, 27, 36, 40, 26, 20, 17, 11, 30, 18]     # depression_severe
+# questions = [20, 9, 40, 30, 11, 19, 2, 36, 28, 4, 1, 23, 7, 27, 18]     # anxiety_severe
+questions = [30, 20, 11, 36, 40, 9, 34, 8, 22, 1, 18, 4, 6, 29, 15]     # anxiety_moderate
 
 # For different numbers of questions from DASS-42
 for num_questions in question_numbers:
@@ -161,6 +162,16 @@ for num_questions in question_numbers:
                 # clf = ComplementNB()
                 # clf = BernoulliNB()
                 # clf = CategoricalNB()
+            elif model_type == "ensemble":
+                clf1 = LogisticRegression()
+                clf2 = SVC()
+                clf3 = RandomForestClassifier()
+                clf4 = XGBClassifier()
+                # clf4 = GradientBoostingClassifier()
+                clf5 = MLPClassifier()
+                clf6 = GaussianNB()
+                clf = StackingClassifier([('lr', clf1), ('svm', clf2), ('rf', clf3), ('xgb', clf4), ('mlp', clf5), ('gnb', clf6)], 
+                                        final_estimator=LogisticRegression())
                 
             else:
                 print("INVALID MODEL TYPE")
@@ -228,18 +239,18 @@ for num_questions in question_numbers:
         models[model_num] = model
         model_num += 1
 
-        # if mean_auc1 > 0.90 and mean_f11 > 0.90:
-        #     models[model_num] = model
-        #     model_num += 1
-        #     plt.xlim([0.0, 1.0])
-        #     plt.ylim([0.0, 1.0])
-        #     plt.xlabel("False Positive Rate")
-        #     plt.ylabel("True Positive Rate")
-        #     plt.plot([0.0, 1.0], [0.0, 1.0], linestyle='--')
-        #     plt.show()
+        if mean_auc1 > 0.90 and mean_f11 > 0.90:
+            models[model_num] = model
+            model_num += 1
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.0])
+            plt.xlabel("False Positive Rate")
+            plt.ylabel("True Positive Rate")
+            plt.plot([0.0, 1.0], [0.0, 1.0], linestyle='--')
+            # plt.show()
         # plt.cla()
 
-    # plt.show()
+    plt.show()
 
     mean_acc = np.mean(accs)
     mean_auc = np.mean(aucs)

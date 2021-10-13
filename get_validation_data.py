@@ -1,13 +1,16 @@
-# Data inspection and filtering
-
 import os
 import json
 import pandas as pd
+import numpy as np
 import pycountry_convert as pc
+from sklearn.utils import resample
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.model_selection import train_test_split
 
 data_folder = "./data"
 target = "anxiety"   # "anxiety", "depression" or "stress"
 level = "moderate"   # moderate or severe
+seed = 42
 
 
 def encode_country(row):
@@ -89,90 +92,10 @@ dataset["region"] = dataset.apply(lambda row: encode_country(row), axis=1)
 dataset["{}_score".format(target)] = dataset.apply(lambda row: calc_score(row), axis=1)
 dataset["{}_status".format(target)] = dataset.apply(lambda row: categorize(row), axis=1)
 
-print("Before filtering:")
-print(dataset['gender'].value_counts())
-print(dataset['age'].value_counts())
-print(dataset['age'].mean(), dataset['age'].std())
-print(dataset['continent'].value_counts())
-print(dataset['region'].value_counts())
-print(dataset['agegroup'].value_counts())
-print(dataset["{}_status".format(target)].value_counts())
-
-print("\nBreakdown by continent:")
-df1 = dataset[dataset['continent'] == 'AS']
-print(df1['age'].mean(), df1['age'].std())
-print(df1['gender'].value_counts())
-print(df1["{}_status".format(target)].value_counts())
-
-df2 = dataset[dataset['continent'] == 'NA']
-print(df2['age'].mean(), df2['age'].std())
-print(df2['gender'].value_counts())
-print(df2["{}_status".format(target)].value_counts())
-
-df3 = dataset[dataset['continent'] == 'EU']
-print(df3['age'].mean(), df3['age'].std())
-print(df3['gender'].value_counts())
-print(df3["{}_status".format(target)].value_counts())
-
-df4 = dataset[dataset['continent'] == 'SA']
-print(df4['age'].mean(), df4['age'].std())
-print(df4['gender'].value_counts())
-print(df4["{}_status".format(target)].value_counts())
-
-df5 = dataset[dataset['continent'] == 'AF']
-print(df5['age'].mean(), df5['age'].std())
-print(df5['gender'].value_counts())
-print(df5["{}_status".format(target)].value_counts())
-
-df6 = dataset[dataset['continent'] == 'OC']
-print(df6['age'].mean(), df6['age'].std())
-print(df6['gender'].value_counts())
-print(df6["{}_status".format(target)].value_counts())
-
-
 # Filter data
 dataset = dataset.drop(dataset[(dataset['gender'] == 0) | (dataset['gender'] == 3)].index)  # Male and females only
 dataset = dataset[dataset['age'] >= 18]  # Adults only
 dataset = dataset[dataset['region'] != ""]  # Must have region
-
-print("\nAfter filtering:")
-print(dataset['gender'].value_counts())
-print(dataset['agegroup'].value_counts())
-print(dataset['age'].mean(), dataset['age'].std())
-print(dataset['continent'].value_counts())
-print(dataset['region'].value_counts())
-print(dataset["{}_status".format(target)].value_counts())
-
-print("\nBreakdown by continent:")
-df1 = dataset[dataset['continent'] == 'AS']
-print(df1['age'].mean(), df1['age'].std())
-print(df1['gender'].value_counts())
-print(df1["{}_status".format(target)].value_counts())
-
-df2 = dataset[dataset['continent'] == 'NA']
-print(df2['age'].mean(), df2['age'].std())
-print(df2['gender'].value_counts())
-print(df2["{}_status".format(target)].value_counts())
-
-df3 = dataset[dataset['continent'] == 'EU']
-print(df3['age'].mean(), df3['age'].std())
-print(df3['gender'].value_counts())
-print(df3["{}_status".format(target)].value_counts())
-
-df4 = dataset[dataset['continent'] == 'SA']
-print(df4['age'].mean(), df4['age'].std())
-print(df4['gender'].value_counts())
-print(df4["{}_status".format(target)].value_counts())
-
-df5 = dataset[dataset['continent'] == 'AF']
-print(df5['age'].mean(), df5['age'].std())
-print(df5['gender'].value_counts())
-print(df5["{}_status".format(target)].value_counts())
-
-df6 = dataset[dataset['continent'] == 'OC']
-print(df6['age'].mean(), df6['age'].std())
-print(df6['gender'].value_counts())
-print(df6["{}_status".format(target)].value_counts())
 
 # Drop unnecessary columns
 to_drop = ["source", "screensize", "uniquenetworklocation", 
@@ -188,4 +111,84 @@ for col in dataset.columns:
         dataset = dataset.drop([col], axis=1)
 
 # Saved filtered dataset
-dataset.to_csv(os.path.join(data_folder, "data_filtered.csv"), index=None)
+# dataset.to_csv(os.path.join(data_folder, "data_filtered.csv"), index=None)
+
+# Separate majority and minority classes
+df_majority = dataset[dataset["{}_status".format(target)] == 1]
+df_minority = dataset[dataset["{}_status".format(target)] == 0]
+
+# Upsample minority class
+data_minority = resample(df_minority, 
+                        replace=True,                       # sample with replacement
+                        n_samples=len(df_majority.index),   # to match majority class
+                        random_state=123)                   # reproducible results
+
+# Downsample majority class
+# data_majority = resample(df_majority, 
+#                         replace=False,                      # sample without replacement
+#                         n_samples=len(df_minority.index),   # to match minority class
+#                         random_state=123)                   # reproducible results
+
+data_df = pd.concat([df_majority, data_minority])
+data_df = data_df.reset_index(drop=True)
+
+# Extract the label columns; separate features and labels
+labels_df = data_df[["{}_status".format(target)]].copy()
+feats_df = data_df.drop(["{}_score".format(target), "{}_status".format(target)], axis=1)
+
+# z-score normalization
+def z_score_norm(row, col, mean, stdev):
+    z_score = (float(row[col]) - mean) / stdev
+    return float(z_score)
+
+# One hot encode gender and region
+label_encoder = LabelEncoder()
+oneh_encoder = OneHotEncoder()
+
+# Gender
+gender = label_encoder.fit_transform(feats_df["gender"])
+gender = pd.DataFrame(gender)
+gender = pd.DataFrame(oneh_encoder.fit_transform(gender).toarray())
+gender.columns = ["gender_m", "gender_f"]
+
+# Region
+region = label_encoder.fit_transform(feats_df["region"])
+region = pd.DataFrame(region)
+region = pd.DataFrame(oneh_encoder.fit_transform(region).toarray())
+region.columns = ["region_other", "region_east", "region_west"]
+
+# Combine and remove original columns
+feats_df = feats_df.drop(["gender", "country", "region", "agegroup", "continent"], axis=1)
+feats_df = pd.concat([feats_df, gender, region], axis=1)
+
+# One-hot encode question answers
+for col in feats_df.columns:
+    if col[0] == "Q" and col[-1] == "A":
+        temp = label_encoder.fit_transform(feats_df[col])
+        temp = pd.DataFrame(temp)
+        temp = pd.DataFrame(oneh_encoder.fit_transform(temp).toarray())
+
+        col_names = []
+        for c in temp.columns:
+            col_names.append("{0}_{1}".format(col, c))
+        temp.columns = col_names
+
+        feats_df = feats_df.drop([col], axis=1)
+        feats_df = pd.concat([feats_df, temp], axis=1)
+
+# Normalize numerical columns (Use z-score)
+mean = feats_df["age"].mean()
+stdev = feats_df["age"].std()
+feats_df["age_norm"] = feats_df.apply(
+                lambda row: z_score_norm(row, "age", mean, stdev), axis=1)
+feats_df = feats_df.drop(["age"], axis=1)
+
+np.random.seed(seed)
+shufId = np.random.permutation(int(len(labels_df)))
+index = int(0.1 * len(labels_df.index))
+
+df_prist = feats_df.iloc[shufId[0:index]]
+gt_prist = labels_df.iloc[shufId[0:index]]
+
+df_prist.to_csv(os.path.join(data_folder, "prist_features.csv"), index=False)
+gt_prist.to_csv(os.path.join(data_folder, "prist_labels.csv"), index=False)
