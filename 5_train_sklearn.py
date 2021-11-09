@@ -115,8 +115,8 @@ for num_questions in question_numbers:
         gt_prist = labels.iloc[shufId[0:index]]
         gt_trainvalid = labels.iloc[shufId[index:-1]]
 
-        df_prist.to_csv(os.path.join(data_folder, "prist_features.csv"), index=False)
-        gt_prist.to_csv(os.path.join(data_folder, "prist_labels.csv"), index=False)
+        df_prist.to_csv(os.path.join(data_folder, "prist_features1.csv"), index=False)
+        gt_prist.to_csv(os.path.join(data_folder, "prist_labels1.csv"), index=False)
 
         accs1 = []
         aucs1 = []

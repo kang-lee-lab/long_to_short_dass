@@ -12,20 +12,20 @@ target = "depression"   # "anxiety", "depression" or "stress"
 
 
 # Processed dataset
-features = pd.read_csv(os.path.join(data_folder, "features.csv"))
-labels = pd.read_csv(os.path.join(data_folder, "labels.csv"))
+# features = pd.read_csv(os.path.join(data_folder, "features.csv"))
+# labels = pd.read_csv(os.path.join(data_folder, "labels.csv"))
 
-# First fit a model for questions plus demographics
-#features = features.drop(["gender_m", "gender_f", "region_other", "region_east", "region_west", "age_norm"], axis=1)  # Comment this line to include demographics
+# # First fit a model for questions plus demographics
+# #features = features.drop(["gender_m", "gender_f", "region_other", "region_east", "region_west", "age_norm"], axis=1)  # Comment this line to include demographics
 
-model = ExtraTreesClassifier()
-model.fit(features, labels)
-print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
+# model = ExtraTreesClassifier()
+# model.fit(features, labels)
+# print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
 
-# Plot graph of feature importances for better visualization
-feat_importances = pd.Series(model.feature_importances_, index=features.columns)
-feat_importances.nlargest(show_top).plot(kind='barh')
-plt.show()
+# # Plot graph of feature importances for better visualization
+# feat_importances = pd.Series(model.feature_importances_, index=features.columns)
+# feat_importances.nlargest(show_top).plot(kind='barh')
+# plt.show()
 
 
 # Unprocessed dataset
@@ -45,9 +45,10 @@ features = features.drop(["{}_score".format(target), "{}_status".format(target),
 
 model = ExtraTreesClassifier()
 model.fit(features, labels)
-print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
+# print(model.feature_importances_) # Use inbuilt class feature_importances of tree based classifiers (Gini importance)
 
 # Plot graph of feature importances for better visualization
 feat_importances = pd.Series(model.feature_importances_, index=features.columns)
 feat_importances.nlargest(show_top).plot(kind='barh')
+print(feat_importances)
 plt.show()

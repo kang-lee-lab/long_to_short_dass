@@ -11,6 +11,7 @@ data_folder = "./data"
 target = "anxiety"   # "anxiety", "depression" or "stress"
 level = "moderate"   # moderate or severe
 seed = 42
+class_balance = 4 # (4 = 80/20, 1 = 50/50)
 
 
 def encode_country(row):
@@ -94,8 +95,10 @@ dataset["{}_status".format(target)] = dataset.apply(lambda row: categorize(row),
 
 # Filter data
 dataset = dataset.drop(dataset[(dataset['gender'] == 0) | (dataset['gender'] == 3)].index)  # Male and females only
-dataset = dataset[dataset['age'] >= 18]  # Adults only
+dataset = dataset[dataset['age'] < 18]  # Adults only
 dataset = dataset[dataset['region'] != ""]  # Must have region
+
+# print(len(dataset))
 
 # Drop unnecessary columns
 to_drop = ["source", "screensize", "uniquenetworklocation", 
@@ -110,6 +113,8 @@ for col in dataset.columns:
     elif col[0] == "Q" and (col[-1] == "E" or col[-1] == "I"):
         dataset = dataset.drop([col], axis=1)
 
+dataset[:30].to_csv(os.path.join(data_folder, "unit_test_{}.csv".format(target)), index=False)
+
 # Separate majority and minority classes
 df_majority = dataset[dataset["{}_status".format(target)] == 1]
 df_minority = dataset[dataset["{}_status".format(target)] == 0]
@@ -123,11 +128,11 @@ df_minority = dataset[dataset["{}_status".format(target)] == 0]
 # Downsample majority class
 df_majority = resample(df_majority, 
                         replace=False,                           # sample without replacement
-                        n_samples=len(df_minority.index) // 4,   # to match minority class
+                        n_samples=len(df_minority.index) // class_balance,   # to match minority class
                         random_state=123)                        # reproducible results
 df_minority = resample(df_minority, 
                         replace=False,                           # sample without replacement
-                        n_samples=len(df_minority.index) - (len(df_minority.index) % 4),   # to match minority class
+                        n_samples=len(df_minority.index) - (len(df_minority.index) % class_balance),   # to match minority class
                         random_state=123)                        # reproducible results
 
 data_df = pd.concat([df_majority, df_minority])
@@ -146,14 +151,16 @@ oneh_encoder = OneHotEncoder()
 # Gender
 gender = label_encoder.fit_transform(data_df["gender"])
 gender = pd.DataFrame(gender)
-gender = pd.DataFrame(oneh_encoder.fit_transform(gender).toarray())
-gender.columns = ["gender_m", "gender_f"]
+gender.columns = ["Dem_Gender"]
+# gender = pd.DataFrame(oneh_encoder.fit_transform(gender).toarray())
+# gender.columns = ["gender_m", "gender_f"]
 
 # Region
 region = label_encoder.fit_transform(data_df["region"])
 region = pd.DataFrame(region)
-region = pd.DataFrame(oneh_encoder.fit_transform(region).toarray())
-region.columns = ["region_other", "region_east", "region_west"]
+region.columns = ["Dem_Region"]
+# region = pd.DataFrame(oneh_encoder.fit_transform(region).toarray())
+# region.columns = ["region_other", "region_east", "region_west"]
 
 # Combine and remove original columns
 data_df = data_df.drop(["gender", "country", "region", "agegroup", "continent"], axis=1)
@@ -164,12 +171,13 @@ for col in data_df.columns:
     if col[0] == "Q" and col[-1] == "A":
         temp = label_encoder.fit_transform(data_df[col])
         temp = pd.DataFrame(temp)
-        temp = pd.DataFrame(oneh_encoder.fit_transform(temp).toarray())
+        # temp = pd.DataFrame(oneh_encoder.fit_transform(temp).toarray())
+        temp.columns = ["BS_DASS42_{}".format(col[:-1])]
 
-        col_names = []
-        for c in temp.columns:
-            col_names.append("{0}_{1}".format(col, c))
-        temp.columns = col_names
+        # col_names = []
+        # for c in temp.columns:
+        #     col_names.append("{0}_{1}".format(col, c))
+        # temp.columns = col_names
 
         data_df = data_df.drop([col], axis=1)
         data_df = pd.concat([data_df, temp], axis=1)
@@ -177,14 +185,15 @@ for col in data_df.columns:
 # Normalize numerical columns (Use z-score)
 mean = data_df["age"].mean()
 stdev = data_df["age"].std()
-data_df["age_norm"] = data_df.apply(
+data_df["Dem_Age"] = data_df.apply(
                 lambda row: z_score_norm(row, "age", mean, stdev), axis=1)
 data_df = data_df.drop(["age"], axis=1)
 
 np.random.seed(seed)
-shufId = np.random.permutation(int(len(data_df)))
-index = int(0.1 * len(data_df.index))
-data_prist = data_df.iloc[shufId[0:index]]
+# shufId = np.random.permutation(int(len(data_df)))
+# index = int(0.1 * len(data_df.index))
+# data_prist = data_df.iloc[shufId[0:index]]
+data_prist = data_df
 
 # Separate majority and minority classes
 low = data_prist[data_prist["{}_status".format(target)] == 0]
@@ -199,11 +208,11 @@ high = data_prist[data_prist["{}_status".format(target)] == 1]
 # Downsample majority class
 high = resample(high, 
                 replace=True,                            # sample without replacement
-                n_samples=len(low.index) // 4,           # to match minority class
+                n_samples=len(low.index) // class_balance,           # to match minority class
                 random_state=123)                        # reproducible results
 low = resample(low, 
                 replace=False,                           # sample without replacement
-                n_samples=len(low.index) - (len(low.index) % 4),   # to match minority class
+                n_samples=len(low.index) - (len(low.index) % class_balance),   # to match minority class
                 random_state=123)                        # reproducible results
 
 data_all = pd.concat([high, low])

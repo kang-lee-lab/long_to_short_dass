@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 
 seed = 42
 data_folder = "./data"
-target = "anxiety"   # "anxiety", "depression" or "stress"
+target = "depression"   # "anxiety", "depression" or "stress"
 
 
 def preprocess(data_df):
