@@ -8,7 +8,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import train_test_split
 
 data_folder = "./data"
-target = "anxiety"   # "anxiety", "depression" or "stress"
+target = "depression"   # "anxiety", "depression" or "stress"
 level = "moderate"   # moderate or severe
 seed = 42
 class_balance = 4 # (4 = 80/20, 1 = 50/50)
