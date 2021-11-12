@@ -14,6 +14,10 @@ seed = 42
 class_balance = 4 # (4 = 80/20, 1 = 50/50)
 
 
+def gen_id(row):
+    return "DASS42_P{}".format(format(row["row_num"], '05d'))
+
+
 def encode_country(row):
     # Encode country into three major regions (east, west, other)
     country_code = row["country"]
@@ -87,6 +91,8 @@ def categorize(row):
 
 
 dataset = pd.read_csv("./data/data.csv", sep='\t')
+dataset["row_num"] = np.arange(len(dataset))
+dataset["ID"] = dataset.apply(lambda row: gen_id(row), axis=1)
 dataset["agegroup"] = dataset.apply(lambda row: encode_age(row), axis=1)
 dataset["continent"] = dataset.apply(lambda row: encode_continent(row), axis=1)
 dataset["region"] = dataset.apply(lambda row: encode_country(row), axis=1)
@@ -101,7 +107,7 @@ dataset = dataset[dataset['region'] != ""]  # Must have region
 # print(len(dataset))
 
 # Drop unnecessary columns
-to_drop = ["source", "screensize", "uniquenetworklocation", 
+to_drop = ["row_num", "source", "screensize", "uniquenetworklocation", 
             "education", "urban", "engnat", "hand", "religion", 
             "orientation", "race", "voted", "married", "major",
             "introelapse", "testelapse", "surveyelapse", "familysize"]
@@ -126,14 +132,16 @@ df_minority = dataset[dataset["{}_status".format(target)] == 0]
 #                         random_state=123)                   # reproducible results
 
 # Downsample majority class
-df_majority = resample(df_majority, 
-                        replace=False,                           # sample without replacement
-                        n_samples=len(df_minority.index) // class_balance,   # to match minority class
-                        random_state=123)                        # reproducible results
-df_minority = resample(df_minority, 
-                        replace=False,                           # sample without replacement
-                        n_samples=len(df_minority.index) - (len(df_minority.index) % class_balance),   # to match minority class
-                        random_state=123)                        # reproducible results
+# df_majority = resample(df_majority, 
+#                         replace=True,                           # sample without replacement
+#                         n_samples=len(df_minority.index) // class_balance,   # to match minority class
+#                         random_state=123)                        # reproducible results
+df_majority = df_majority[:len(df_minority.index) // class_balance]
+df_minority = df_minority[:len(df_minority.index) - (len(df_minority.index) % class_balance)]
+# df_minority = resample(df_minority, 
+#                         replace=True,                           # sample without replacement
+#                         n_samples=len(df_minority.index) - (len(df_minority.index) % class_balance),   # to match minority class
+#                         random_state=123)                        # reproducible results
 
 data_df = pd.concat([df_majority, df_minority])
 data_df = data_df.reset_index(drop=True)
@@ -141,8 +149,9 @@ data_df = data_df.drop(["{}_score".format(target)], axis=1)
 
 # z-score normalization
 def z_score_norm(row, col, mean, stdev):
-    z_score = (float(row[col]) - mean) / stdev
-    return float(z_score)
+    return row[col]
+    # z_score = (float(row[col]) - mean) / stdev
+    # return float(z_score)
 
 # One hot encode gender and region
 label_encoder = LabelEncoder()
@@ -164,7 +173,6 @@ region.columns = ["Dem_Region"]
 
 # Combine and remove original columns
 data_df = data_df.drop(["gender", "country", "region", "agegroup", "continent"], axis=1)
-data_df = pd.concat([data_df, gender, region], axis=1)
 
 # One-hot encode question answers
 for col in data_df.columns:
@@ -188,6 +196,7 @@ stdev = data_df["age"].std()
 data_df["Dem_Age"] = data_df.apply(
                 lambda row: z_score_norm(row, "age", mean, stdev), axis=1)
 data_df = data_df.drop(["age"], axis=1)
+data_df = pd.concat([data_df, gender, region], axis=1)
 
 np.random.seed(seed)
 # shufId = np.random.permutation(int(len(data_df)))
@@ -222,5 +231,8 @@ labels_df = data_all[["{}_status".format(target)]].copy()
 feats_df = data_all.drop(["{}_status".format(target)], axis=1)
 print(labels_df["{}_status".format(target)].value_counts())
 
-feats_df.to_csv(os.path.join(data_folder, "prist_features.csv"), index=False)
-labels_df.to_csv(os.path.join(data_folder, "prist_labels.csv"), index=False)
+# feats_df.to_csv(os.path.join(data_folder, "prist_features.csv"), index=False)
+# labels_df.to_csv(os.path.join(data_folder, "prist_labels.csv"), index=False)
+
+data_df = pd.concat([feats_df, labels_df], axis=1)
+data_df.to_csv(os.path.join(data_folder,"test_data_{0}_{1}.csv".format(target, level)), index=False)

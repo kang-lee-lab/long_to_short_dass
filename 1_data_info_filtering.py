@@ -3,11 +3,16 @@
 import os
 import json
 import pandas as pd
+import numpy as np
 import pycountry_convert as pc
 
 data_folder = "./data"
 target = "depression"   # "anxiety", "depression" or "stress"
 level = "moderate"   # moderate or severe
+
+
+def gen_id(row):
+    return "DASS42_P{}".format(format(row["row_num"], '05d'))
 
 
 def encode_country(row):
@@ -83,6 +88,8 @@ def categorize(row):
 
 
 dataset = pd.read_csv("./data/data.csv", sep='\t')
+dataset["row_num"] = np.arange(len(dataset))
+dataset["ID"] = dataset.apply(lambda row: gen_id(row), axis=1)
 dataset["agegroup"] = dataset.apply(lambda row: encode_age(row), axis=1)
 dataset["continent"] = dataset.apply(lambda row: encode_continent(row), axis=1)
 dataset["region"] = dataset.apply(lambda row: encode_country(row), axis=1)

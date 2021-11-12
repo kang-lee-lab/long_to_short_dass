@@ -22,8 +22,11 @@ def test_accuracy(models, df_prist, gt_prist):
     REC = 0
     F1 = 0
 
+    xgbpprist_prob = pd.DataFrame([0] * len(df_prist))
     for model in models:
         # Call predict function
+        pred_prob = model.predict_proba(df_prist)[:, 1].reshape(-1, 1)
+        xgbpprist_prob += pred_prob
         xgbpprist = model.predict(df_prist)
         xgbpprist = pd.DataFrame(xgbpprist)
 
@@ -48,12 +51,12 @@ def test_accuracy(models, df_prist, gt_prist):
         F1 += f1score
 
     l = len(models)
-    return TN/l, FP/l, FN/l, TP/l, ACC/l, AUC/l, PRE/l, REC/l, F1/l, xgbpprist
+    xgbpprist_prob = xgbpprist_prob / len(models)
+    return TN/l, FP/l, FN/l, TP/l, ACC/l, AUC/l, PRE/l, REC/l, F1/l, xgbpprist_prob
 
 
-def test_model(model_path, test_feats, test_labels):
-    features = pd.read_csv(test_feats)
-    labels = pd.read_csv(test_labels)
+def test_model(model_path, test_data_csv):
+    data = pd.read_csv(test_data_csv)
     if "anxiety" in model_path:
         target = "anxiety"
     elif "depression" in model_path:
@@ -61,6 +64,7 @@ def test_model(model_path, test_feats, test_labels):
     elif "stress" in model_path:
         target = "stress"
     target_col = "{}_status".format(target)
+    labels = data[[target_col]]
     
     TN = 0
     FP = 0
@@ -72,6 +76,10 @@ def test_model(model_path, test_feats, test_labels):
         obj = pickle.load(f)
         l = len(obj)
 
+    obj["stats"] = {
+        "Dem_Age": {"mean": 23.61, "stdev": 21.58}
+    } 
+    xgbpprist_prob = pd.DataFrame([0] * len(data))
     for i, model in obj.items():
         cols = ["Dem_Gender", "Dem_Region", "Dem_Age"]
 
@@ -80,15 +88,17 @@ def test_model(model_path, test_feats, test_labels):
             # for j in range(4):
             #     cols.append("Q{0}A_{1}".format(q, j))
         obj[i]["feature_names"] = cols
-        feats = features[cols]
+        feats = data[cols]
+        feats["Dem_Age"] = (feats["Dem_Age"] - obj["stats"]["Dem_Age"]["mean"]) / obj["stats"]["Dem_Age"]["stdev"]
 
         tn, fp, fn, tp, acc, auc, precision, recall, f1score, pred = test_accuracy(model["models"], feats, 
-                                            labels[target_col])
+                                            labels)
         TN += tn
         FP += fp
         FN += tp
         TP += fn
         AUC += auc
+        xgbpprist_prob += pred
 
         # Record model test accuracy metrics
         obj[i]["test_accuracy_metrics"] = {
@@ -98,9 +108,10 @@ def test_model(model_path, test_feats, test_labels):
             "Recall": round(recall * 100, 2),
             "F1 Score": round(f1score * 100, 2)
         }
-
-        if "model_{}_pred".format(i) not in labels.columns:
-            labels["model_{}_pred".format(i)] = pred
+        
+    xgbpprist_prob = xgbpprist_prob / len(obj)
+    if "prob_{}".format(target) not in data.columns:
+        data["prob_{}".format(target)] = pred
     
     # Calculate overall test accuracy metrics (across all models)
     print("Class 1 count: {0}; Class 0 count: {1}".format(len(labels[labels[target_col] == 1]), len(labels[labels[target_col] == 0])))
@@ -118,7 +129,7 @@ def test_model(model_path, test_feats, test_labels):
 
     print("TPR: {0}; FPR: {1}; FNR: {2}; TNR: {3}".format(TPR, FPR, FNR, TNR))
     print("ACC: {0}; AUC: {1}; PRE: {2}; REC: {3}; F1: {4}".format(ACC, AUC, PRE, TPR, F1))
-    labels.to_csv(test_labels, index=False)
+    data.to_csv(test_data_csv, index=False)
 
     # Save updated model object
     with open(model_path, "wb") as f:
@@ -126,6 +137,5 @@ def test_model(model_path, test_feats, test_labels):
         
 
 if __name__ == "__main__":
-    test_model("./models/depression/BS_depression_moderate_xgb_01.bin", 
-                "./data/prist_features.csv", 
-                "./data/prist_labels.csv")
+    test_model("./models/anxiety/BS_anxiety_moderate_xgb_01.bin", 
+               "./models/anxiety/test_data_anxiety_moderate.csv")
