@@ -10,12 +10,17 @@ from sklearn.model_selection import train_test_split
 data_folder = "./data"
 target = "depression"   # "anxiety", "depression" or "stress"
 level = "moderate"   # moderate or severe
+onehot = True
 seed = 42
 class_balance = 4 # (4 = 80/20, 1 = 50/50)
 
 
 def gen_id(row):
     return "DASS42_P{}".format(format(row["row_num"], '05d'))
+
+
+def convert_gender(row):
+    return 0 if row["gender"] == 2 else 1
 
 
 def encode_country(row):
@@ -119,7 +124,7 @@ for col in dataset.columns:
     elif col[0] == "Q" and (col[-1] == "E" or col[-1] == "I"):
         dataset = dataset.drop([col], axis=1)
 
-dataset[:30].to_csv(os.path.join(data_folder, "unit_test_{}.csv".format(target)), index=False)
+# dataset[:30].to_csv(os.path.join(data_folder, "unit_test_{}.csv".format(target)), index=False)
 
 # Separate majority and minority classes
 df_majority = dataset[dataset["{}_status".format(target)] == 1]
@@ -149,27 +154,30 @@ data_df = data_df.drop(["{}_score".format(target)], axis=1)
 
 # z-score normalization
 def z_score_norm(row, col, mean, stdev):
-    return row[col]
-    # z_score = (float(row[col]) - mean) / stdev
-    # return float(z_score)
+    z_score = (float(row[col]) - mean) / stdev
+    return float(z_score)
 
 # One hot encode gender and region
 label_encoder = LabelEncoder()
 oneh_encoder = OneHotEncoder()
 
 # Gender
-gender = label_encoder.fit_transform(data_df["gender"])
-gender = pd.DataFrame(gender)
-gender.columns = ["Dem_Gender"]
-# gender = pd.DataFrame(oneh_encoder.fit_transform(gender).toarray())
-# gender.columns = ["gender_m", "gender_f"]
+if not onehot:
+    dataset["Dem_Gender"] = dataset.apply(lambda row: convert_gender(row), axis=1)
+else:
+    gender = label_encoder.fit_transform(data_df["gender"])
+    gender = pd.DataFrame(gender)
+    gender = pd.DataFrame(oneh_encoder.fit_transform(gender).toarray())
+    gender.columns = ["gender_m", "gender_f"]
 
 # Region
 region = label_encoder.fit_transform(data_df["region"])
 region = pd.DataFrame(region)
-region.columns = ["Dem_Region"]
-# region = pd.DataFrame(oneh_encoder.fit_transform(region).toarray())
-# region.columns = ["region_other", "region_east", "region_west"]
+if not onehot:
+    region.columns = ["Dem_Region"]
+else:
+    region = pd.DataFrame(oneh_encoder.fit_transform(region).toarray())
+    region.columns = ["region_other", "region_east", "region_west"]
 
 # Combine and remove original columns
 data_df = data_df.drop(["gender", "country", "region", "agegroup", "continent"], axis=1)
@@ -179,13 +187,14 @@ for col in data_df.columns:
     if col[0] == "Q" and col[-1] == "A":
         temp = label_encoder.fit_transform(data_df[col])
         temp = pd.DataFrame(temp)
-        # temp = pd.DataFrame(oneh_encoder.fit_transform(temp).toarray())
-        temp.columns = ["BS_DASS42_{}".format(col[:-1])]
-
-        # col_names = []
-        # for c in temp.columns:
-        #     col_names.append("{0}_{1}".format(col, c))
-        # temp.columns = col_names
+        if not onehot:
+            temp.columns = ["BS_DASS42_{}".format(col[:-1])]
+        else:
+            temp = pd.DataFrame(oneh_encoder.fit_transform(temp).toarray())
+            col_names = []
+            for c in temp.columns:
+                col_names.append("{0}_{1}".format(col, c))
+            temp.columns = col_names
 
         data_df = data_df.drop([col], axis=1)
         data_df = pd.concat([data_df, temp], axis=1)
@@ -193,10 +202,15 @@ for col in data_df.columns:
 # Normalize numerical columns (Use z-score)
 mean = data_df["age"].mean()
 stdev = data_df["age"].std()
-data_df["Dem_Age"] = data_df.apply(
+
+if not onehot:
+    data_df = pd.concat([data_df, region], axis=1)
+    data_df["Dem_Age"] = data_df["age"]
+else:
+    data_df = pd.concat([data_df, gender, region], axis=1)
+    data_df["age_norm"] = data_df.apply(
                 lambda row: z_score_norm(row, "age", mean, stdev), axis=1)
 data_df = data_df.drop(["age"], axis=1)
-data_df = pd.concat([data_df, gender, region], axis=1)
 
 np.random.seed(seed)
 # shufId = np.random.permutation(int(len(data_df)))
