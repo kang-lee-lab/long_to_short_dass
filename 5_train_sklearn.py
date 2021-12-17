@@ -17,6 +17,7 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from xgboost import XGBClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import (GaussianNB, MultinomialNB, ComplementNB, BernoulliNB, CategoricalNB)
+import shap
 
 
 def confidence_interval(data, confidence=0.95):
@@ -208,6 +209,10 @@ for num_questions in question_numbers:
             recs1.append(recall)
             f1s1.append(f1score)
             ensemble_models.append(clf)
+
+            # Shapley score analysis
+            explainer = shap.Explainer(clf)
+            shap_values = explainer(df_prist)
 
         mean_acc1 = np.mean(accs1)
         mean_auc1 = np.mean(aucs1)
