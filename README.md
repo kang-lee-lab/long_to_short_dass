@@ -6,9 +6,17 @@ A demo dataset (`data_filtered.csv`) is included under the `/data` folder. A cod
 
 The relevant code are all in the Master branch. Please do not look at the other branches. The experiment code files are numbered in the order of steps.
 
+
+## Publications
+
+Sun, Y.H., Luo, H. & Lee, K. (2022). A Novel Approach for Developing Efficient and Convenient Short Assessments to Approximate a Long Assessment. Behavior Research Methods. https://doi.org/10.3758/s13428-021-01771-7
+
+Sun, Y.H., Liu, Q., Lee, N.Y., Li, X., & Lee, K. (2022). A novel machine learning approach to shorten depression risk assessment for convenient uses. Journal of Affective Disorders, 312, 275–291. https://doi.org/10.1016/j.jad.2022.06.035
+
+
 ## Instructions to run code
 
-First git clone this repository onto your computer following the instructions on the GitHub page.
+First, git clone this repository onto your computer following the instructions on the GitHub page.
 
 Make sure you have Python (version 3.6 or later) installed on your computer. Install all the libraries listed in `requirements.txt` (If you have pip, use the command `pip install -r requirements.txt`). Note that in Linux, you may need to install `python3-dev` and `python3-tk` for some libraries to work.
 
