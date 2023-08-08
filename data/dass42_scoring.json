@@ -1,0 +1,68 @@
+{
+    "depression_score": {
+        "normal": {
+            "min": 0,
+            "max": 9
+        },
+        "mild": {
+            "min": 10,
+            "max": 13
+        },
+        "moderate": {
+            "min": 14,
+            "max": 20
+        },
+        "severe": {
+            "min": 21,
+            "max": 27
+        },
+        "exceptional": {
+            "min": 28,
+            "max": 100
+        }
+    },
+    "anxiety_score": {
+        "normal": {
+            "min": 0,
+            "max": 7
+        },
+        "mild": {
+            "min": 8,
+            "max": 9
+        },
+        "moderate": {
+            "min": 10,
+            "max": 14
+        },
+        "severe": {
+            "min": 15,
+            "max": 19
+        },
+        "exceptional": {
+            "min": 20,
+            "max": 100
+        }
+    },
+    "stress_score": {
+        "normal": {
+            "min": 0,
+            "max": 14
+        },
+        "mild": {
+            "min": 15,
+            "max": 18
+        },
+        "moderate": {
+            "min": 19,
+            "max": 25
+        },
+        "severe": {
+            "min": 26,
+            "max": 33
+        },
+        "exceptional": {
+            "min": 34,
+            "max": 100
+        }
+    }
+}
