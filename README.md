@@ -62,5 +62,7 @@ pip install xgboost==1.7.4
 ```
 If the code crashes and raises the error ModuleNotFoundError: No module named 'module name', copy the module name and use pip to install the package.
 
-# Link to publication
-doi.org/10.3758/s13428-021-01771-7 
+# Publications
+Sun, Y.H., Luo, H. & Lee, K. (2022). A Novel Approach for Developing Efficient and Convenient Short Assessments to Approximate a Long Assessment. Behavior Research Methods. https://doi.org/10.3758/s13428-021-01771-7
+
+Sun, Y.H., Liu, Q., Lee, N.Y., Li, X., & Lee, K. (2022). A novel machine learning approach to shorten depression risk assessment for convenient uses. Journal of Affective Disorders, 312, 275–291. https://doi.org/10.1016/j.jad.2022.06.035
